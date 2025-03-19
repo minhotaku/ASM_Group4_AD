@@ -1,6 +1,6 @@
 package com.project.cem.model;
-
-public class User {
+import java.io.Serializable;
+public class User implements Serializable{
     private int userID;
     private String email;
     private String password;
