@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "224134726852",
+    "project_id": "asm-cem-43927",
+    "storage_bucket": "asm-cem-43927.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224134726852:android:c7f09e0b4b21eab8653591",
+        "android_client_info": {
+          "package_name": "com.project.cem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDavYpQLC00gLoRBFKIK5mUf12PSrR2CxY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
