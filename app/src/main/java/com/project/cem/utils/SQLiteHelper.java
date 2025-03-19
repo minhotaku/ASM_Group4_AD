@@ -1,12 +1,9 @@
 package com.project.cem.utils;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.project.cem.model.User;
 
 public class SQLiteHelper extends SQLiteOpenHelper {
 
@@ -109,17 +106,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Method to add a user
-    public long addUser(User user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("email", user.getEmail()); // Đổi từ username thành email
-        values.put("password", user.getPassword());
-        values.put("role", user.getRole());
-        long id = db.insert(TABLE_USER, null, values);
-        db.close();
-        return id;
-    }
+
 
     public boolean isEmailExists(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
