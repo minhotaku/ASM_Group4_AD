@@ -38,11 +38,11 @@ public class SampleDataInitializer {
 
                 // 2. Dữ liệu mẫu cho bảng User
                 db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
-                        " (email, password, role) VALUES ('test@example.com', 'password123', 'User')");
+                        " (email, password, role) VALUES ('test@example.com', 'password123', 'user')");
                 db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
-                        " (email, password, role) VALUES ('admin@example.com', 'admin123', 'Admin')");
+                        " (email, password, role) VALUES ('admin@example.com', 'admin123', 'admin')");
                 db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
-                        " (email, password, role) VALUES ('user2@example.com', 'pass456', 'User')");
+                        " (email, password, role) VALUES ('user2@example.com', 'pass456', 'user')");
 
                 // 3. Dữ liệu mẫu cho bảng Expense (Đã sửa lỗi "penal amount" thành "amount")
                 db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE +
