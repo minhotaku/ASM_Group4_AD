@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.project.cem.R;
+import com.project.cem.utils.SampleDataInitializer;
 import com.project.cem.viewmodel.LoginViewModel;
 
 public class LoginActivity extends AppCompatActivity {
@@ -19,6 +20,11 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Khởi tạo dữ liệu mẫu
+        SampleDataInitializer sampleDataInitializer = new SampleDataInitializer(this);
+        sampleDataInitializer.initializeSampleData();
+
         setContentView(R.layout.activity_login);
 
         // Khởi tạo các view
