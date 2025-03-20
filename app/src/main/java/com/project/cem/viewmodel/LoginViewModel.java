@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.project.cem.model.User;
 import com.project.cem.repository.UserRepository;
+import com.project.cem.utils.UserPreferences;
 
 public class LoginViewModel extends AndroidViewModel {
     private final UserRepository userRepository;
@@ -26,6 +27,9 @@ public class LoginViewModel extends AndroidViewModel {
         // Nếu user != null, có nghĩa là đăng nhập thành công
         if (user != null) {
             loginStatus.setValue(user);
+
+            // Lưu thông tin người dùng vào SharedPreferences
+            UserPreferences.saveUser(getApplication().getApplicationContext(), user);
         } else {
             loginStatus.setValue(null);  // Đăng nhập thất bại
         }

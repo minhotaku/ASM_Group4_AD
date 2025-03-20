@@ -1,5 +1,6 @@
 package com.project.cem.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,7 +18,7 @@ import com.project.cem.viewmodel.RegisterViewModel;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText edtRegisterEmail, edtRegisterPassword;
-    private Button btnRegister;
+    private Button btnRegister, btnBackToLogin;
     private RegisterViewModel registerViewModel;
 
     @Override
@@ -29,6 +30,8 @@ public class RegisterActivity extends AppCompatActivity {
         edtRegisterEmail = findViewById(R.id.edtRegisterEmail);
         edtRegisterPassword = findViewById(R.id.edtRegisterPassword);
         btnRegister = findViewById(R.id.btnRegister);
+        btnBackToLogin = findViewById(R.id.btnBackToLogin);
+
 
         registerViewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
         btnRegister.setOnClickListener(v -> {
@@ -40,6 +43,13 @@ public class RegisterActivity extends AppCompatActivity {
             }
             registerViewModel.register(email, password);
         });
+
+
+        btnBackToLogin.setOnClickListener(v -> {
+            navigateLogin();
+                });
+
+
         registerViewModel.getRegisterStatus().observe(this,success->{
             if(success){
                 Toast.makeText(RegisterActivity.this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
@@ -47,6 +57,12 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(RegisterActivity.this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();
             }
         });
+
+    }
+    private void navigateLogin(){
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
 
     }
 }

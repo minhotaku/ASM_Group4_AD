@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.project.cem.R;
 import com.project.cem.utils.SampleDataInitializer;
+import com.project.cem.utils.UserPreferences;
 import com.project.cem.viewmodel.LoginViewModel;
 
 public class LoginActivity extends AppCompatActivity {
@@ -20,6 +21,13 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        // Kiem tra thong tin nguoi dung khi dang nhap
+        if(UserPreferences.getUser(this)!=null){
+            navigateStudentHome();
+        }
+
 
         // Khởi tạo dữ liệu mẫu
         SampleDataInitializer sampleDataInitializer = new SampleDataInitializer(this);
