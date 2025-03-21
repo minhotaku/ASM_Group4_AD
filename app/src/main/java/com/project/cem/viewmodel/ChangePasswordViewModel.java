@@ -43,7 +43,7 @@ public class ChangePasswordViewModel extends AndroidViewModel {
             return;
         }
 
-        if(!userRepository.login(user.getEmail(), oldPassword).getPassword().equals(oldPassword)){
+        if(userRepository.login(user.getEmail(), oldPassword) == null){
             errorMessage.setValue("Mật khẩu cũ không đúng");
             return;
         }
