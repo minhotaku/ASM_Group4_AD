@@ -80,12 +80,19 @@ public class ChangePasswordFragment extends Fragment {
             String oldPassword = edtOldPassword.getText().toString().trim();
             String newPassword = edtNewPassword.getText().toString().trim();
             String confirmPassword = edtConfirmPassword.getText().toString().trim();
-            viewModel.changePassword(requireContext(), oldPassword, newPassword, confirmPassword);
+            viewModel.changePassword(oldPassword, newPassword, confirmPassword);
         });
 
-        viewModel.getStatusMessage().observe(getViewLifecycleOwner(), message -> {
-            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
+            Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
         });
+
+        viewModel.getIsPasswordChanged().observe(getViewLifecycleOwner(), isPasswordChanged -> {
+            Toast.makeText(getContext(), isPasswordChanged, Toast.LENGTH_SHORT).show();
+        });
+
+
 
         return view;
     }

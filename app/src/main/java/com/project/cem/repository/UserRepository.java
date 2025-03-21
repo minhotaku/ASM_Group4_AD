@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.project.cem.model.User;
 import com.project.cem.utils.SQLiteHelper;
-
 public class UserRepository {
 
     private SQLiteHelper sqLiteHelper;
@@ -76,4 +75,30 @@ public class UserRepository {
 
         return id != -1; // Trả về true nếu đăng ký thành công, false nếu thất bại
     }
+    public boolean changePassword(int userID, String newPassword) {
+        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("password", newPassword); // Make sure to hash the password before saving it
+
+        String selection = "userID = ?"; // Query by userID
+        String[] selectionArgs = {String.valueOf(userID)}; // Convert userID to string for query
+
+        int count = -1;
+        try {
+            count = db.update(
+                    SQLiteHelper.TABLE_USER,
+                    values,
+                    selection,
+                    selectionArgs
+            );
+        } catch (SQLException e) {
+            e.printStackTrace(); // Log the exception
+        } finally {
+            db.close();
+        }
+
+        return count > 0; // Return true if password was changed successfully, false if failed
+    }
+
+
 }

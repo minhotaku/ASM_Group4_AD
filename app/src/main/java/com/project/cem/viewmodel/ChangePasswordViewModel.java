@@ -1,10 +1,12 @@
 package com.project.cem.viewmodel;
 
+import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -12,56 +14,59 @@ import com.project.cem.model.User;
 import com.project.cem.repository.UserRepository;
 import com.project.cem.utils.UserPreferences;
 
-public class ChangePasswordViewModel extends ViewModel {
-    private final MutableLiveData<String> statusMessage = new MutableLiveData<>();
+public class ChangePasswordViewModel extends AndroidViewModel {
+    private final UserRepository userRepository;
 
-    public LiveData<String> getStatusMessage() {
-        return statusMessage;
+    private final MutableLiveData<String>  errorMessage = new MutableLiveData<>(); // Lỗi trong quá trình nhập mật khẩu
+    private final MutableLiveData<String> isPasswordChanged = new MutableLiveData<>(); // Lưu trạng thái thay đổi mật khẩu
+
+    public ChangePasswordViewModel(Application application) {
+        super(application);
+        userRepository = new UserRepository(application.getApplicationContext());
+
     }
 
-    public void changePassword(Context context, String oldPassword, String newPassword, String confirmPassword) {
-        if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            statusMessage.setValue("Fields cannot be empty");
+    public void changePassword(String oldPassword, String newPassword, String confirmPassword) {
+        if(oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()){
+            errorMessage.setValue("Vui lòng nhập đầy đủ thông tin");
             return;
         }
 
-        if (!newPassword.equals(confirmPassword)) {
-            statusMessage.setValue("New passwords do not match");
+        if(!newPassword.equals(confirmPassword)){
+            errorMessage.setValue("Mật khẩu mới và mật khẩu xác nhận không khớp");
             return;
         }
 
-        User loggedInUser = UserPreferences.getUser(context);
-        if (loggedInUser == null) {
-            statusMessage.setValue("User not logged in");
+        User user = UserPreferences.getUser(getApplication().getApplicationContext());
+        if(user == null){
+            errorMessage.setValue("Người dùng không hợp lệ");
             return;
         }
 
-        SQLiteDatabase db = context.openOrCreateDatabase("UserDB", Context.MODE_PRIVATE, null);
-        Cursor cursor = db.rawQuery("SELECT password FROM users WHERE user_id = ?", new String[]{String.valueOf(loggedInUser.getUserID())});
-
-        if (cursor.moveToFirst()) {
-            String storedPassword = cursor.getString(0);
-            if (!storedPassword.equals(oldPassword)) {
-                statusMessage.setValue("Incorrect old password");
-                cursor.close();
-                return;
-            }
-        } else {
-            statusMessage.setValue("User not found");
-            cursor.close();
+        if(!userRepository.login(user.getEmail(), oldPassword).getPassword().equals(oldPassword)){
+            errorMessage.setValue("Mật khẩu cũ không đúng");
             return;
         }
-        cursor.close();
 
-        ContentValues values = new ContentValues();
-        values.put("password", newPassword);
-        int result = db.update("users", values, "user_id=?", new String[]{String.valueOf(loggedInUser.getUserID())});
-        db.close();
-
-        if (result > 0) {
-            statusMessage.setValue("Password changed successfully");
-        } else {
-            statusMessage.setValue("Password change failed");
+        if(userRepository.changePassword(user.getUserID(), newPassword)){
+            isPasswordChanged.setValue("Mật khẩu đã được thay đổi thành công");
+        }else{
+            errorMessage.setValue("Lỗi khi thay đổi mật khẩu");
         }
+
     }
+
+    public LiveData<String> getErrorMessage() {
+        return errorMessage;
+
+
+    }
+
+    public LiveData<String> getIsPasswordChanged() {
+        return isPasswordChanged;
+    }
+
+
+
+
 }
