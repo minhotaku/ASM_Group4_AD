@@ -40,11 +40,11 @@ public class BudgetFragment extends Fragment {
     private EditText edtStartDate;
     private EditText edtEndDate;
     private Button btnSave;
+    private ProgressBar progressBar;
     private RecyclerView rclViewBudgets;
     private BudgetsAdapter budgetsAdapter;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-    private ProgressBar progressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,15 +56,12 @@ public class BudgetFragment extends Fragment {
         edtStartDate = view.findViewById(R.id.edt_start_date);
         edtEndDate = view.findViewById(R.id.edt_end_date);
         btnSave = view.findViewById(R.id.btn_save);
-        rclViewBudgets = view.findViewById(R.id.rcl_view_budgets);
         progressBar = view.findViewById(R.id.progress_bar);
-
+        rclViewBudgets = view.findViewById(R.id.rcl_view_budgets);
 
         rclViewBudgets.setLayoutManager(new LinearLayoutManager(getContext()));
-        budgetsAdapter = new BudgetsAdapter(new ArrayList<>(), budgetViewModel);
+        budgetsAdapter = new BudgetsAdapter(new ArrayList<>(), categoriesList, budgetViewModel);
         rclViewBudgets.setAdapter(budgetsAdapter);
-
-
 
         budgetViewModel = new ViewModelProvider(this).get(BudgetViewModel.class);
 
@@ -78,6 +75,8 @@ public class BudgetFragment extends Fragment {
             for (ExpenseCategory category : categories) {
                 Log.d("BudgetFragment", "Category ID: " + category.getCategoryID() + ", Name: " + category.getCategoryName());
             }
+
+            budgetsAdapter.setCategories(categoriesList);
         });
 
         budgetViewModel.getAllBudgets().observe(getViewLifecycleOwner(), budgets -> {

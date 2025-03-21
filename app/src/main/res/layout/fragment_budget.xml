@@ -69,12 +69,14 @@
         android:text="Save"
         app:backgroundTint="@null" />
 
-    <include
-        layout="@layout/progress_bar"
+    <ProgressBar
+        android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="gone" />
+        android:indeterminate="true"
+        android:progressTint="@color/red"
+        android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcl_view_budgets"

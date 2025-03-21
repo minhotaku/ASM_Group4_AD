@@ -85,7 +85,6 @@ public class BudgetViewModel extends AndroidViewModel {
         new Thread(() -> {
             int rowsAffected = budgetRepository.update(budget);
             new Handler(Looper.getMainLooper()).post(() -> {
-
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
