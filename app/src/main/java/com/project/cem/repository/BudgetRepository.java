@@ -39,11 +39,17 @@ public class BudgetRepository {
         values.put("startDate", dateFormat.format(budget.getStartDate()));
         values.put("endDate", dateFormat.format(budget.getEndDate()));
 
+        com.project.cem.model.User user = UserPreferences.getUser(context);
+        if (user != null) {
+            values.put("userID", user.getUserID());
+        } else {
+            Log.e("BudgetRepository", "User is null, cannot insert userID.");
+            return -1;
+        }
+
         long newRowId = db.insert(SQLiteHelper.TABLE_BUDGET, null, values);
         db.close();
-
         Log.d("BudgetRepository", "Insert result (newRowId): " + newRowId);
-
         return newRowId;
     }
 
@@ -59,20 +65,19 @@ public class BudgetRepository {
         }
 
         int userId = user.getUserID();
-        Log.d("BudgetRepository", "getAllBudgets - UserID: " + userId); // Thêm log user ID
+        Log.d("BudgetRepository", "getAllBudgets - UserID: " + userId);
 
-        Log.d("BudgetRepository", "UserID: " + userId);
-        String query = "SELECT DISTINCT B.budgetID, B.categoryID, B.amount, B.startDate, B.endDate, EC.categoryName " +
+        String query = "SELECT B.budgetID, B.categoryID, B.amount, B.startDate, B.endDate, EC.categoryName " +
                 "FROM " + SQLiteHelper.TABLE_BUDGET + " B " +
                 "INNER JOIN " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " EC ON B.categoryID = EC.categoryID " +
-                "INNER JOIN " + SQLiteHelper.TABLE_EXPENSE + " E ON B.categoryID = E.categoryID " +
-                "WHERE E.userID = ?";
+                "WHERE B.userID = ?";
+
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
 
         if (cursor != null) {
-            Log.d("BudgetRepository", "Number of budgets found: " + cursor.getCount());
+            Log.d("BudgetRepository", "getAllBudgets - Number of budgets found: " + cursor.getCount());
         } else {
-            Log.d("BudgetRepository", "Cursor is NULL!");
+            Log.d("BudgetRepository", "getAllBudgets - Cursor is NULL!");
         }
 
         if (cursor != null && cursor.moveToFirst()) {
@@ -95,17 +100,14 @@ public class BudgetRepository {
                 }
             } while (cursor.moveToNext());
         }
-
         if (cursor != null) {
             cursor.close();
         }
         db.close();
         Log.d("BudgetRepository", "getAllBudgets - Budget list size before setValue: " + budgetList.size());
         budgetsLiveData.setValue(budgetList);
-
         return budgetsLiveData;
     }
-
     public int update(Budget budget) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -114,28 +116,59 @@ public class BudgetRepository {
         values.put("startDate", dateFormat.format(budget.getStartDate()));
         values.put("endDate", dateFormat.format(budget.getEndDate()));
 
+        com.project.cem.model.User user = UserPreferences.getUser(context);
+        if(user != null){
+            values.put("userID", user.getUserID());
+        }
+        else {
+            Log.e("BudgetRepository", "User is null, cannot update userID.");
+            return -1;
+        }
+
         String selection = "budgetID = ?";
         String[] selectionArgs = {String.valueOf(budget.getBudgetID())};
 
         int count = db.update(SQLiteHelper.TABLE_BUDGET, values, selection, selectionArgs);
         db.close();
+        Log.d("BudgetRepository", "Update count: " + count);
         return count;
     }
 
     public List<ExpenseCategory> getAllCategories() {
         List<ExpenseCategory> categories = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY, null);
+        com.project.cem.model.User user = UserPreferences.getUser(context);
+
+        if (user == null) {
+            Log.e("BudgetRepository", "getAllCategories - User is NULL!");
+            return categories;
+        }
+
+        Log.d("BudgetRepository", "getAllCategories - UserID: " + user.getUserID());
+        String query = "SELECT * FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY+ " WHERE userID = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(user.getUserID())});
+
+        if (cursor != null) {
+            Log.d("BudgetRepository", "getAllCategories - Number of categories found: " + cursor.getCount());
+        } else {
+            Log.d("BudgetRepository", "getAllCategories - Cursor is NULL!");
+        }
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("categoryName"));
-                categories.add(new ExpenseCategory(id, name));
+                int userId = cursor.getInt(cursor.getColumnIndexOrThrow("userID"));
+                categories.add(new ExpenseCategory(id, userId, name));
             } while (cursor.moveToNext());
             cursor.close();
         }
+        else {
+            Log.d("BudgetRepository", "getAllCategories - Cursor is empty or null.");
+        }
         db.close();
+        Log.d("BudgetRepository", "getAllCategories - Category list size: " + categories.size());
         return categories;
     }
 }
