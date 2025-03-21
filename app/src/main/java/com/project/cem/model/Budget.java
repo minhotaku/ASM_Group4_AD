@@ -12,20 +12,16 @@ public class Budget {
 
     public Budget() {
     }
-    public Budget(int categoryID, double amount, Date startDate, Date endDate) {
+
+    public Budget(int budgetID, int userID, int categoryID, double amount, Date startDate, Date endDate) {
+        this.budgetID = budgetID;
+        this.userID = userID;
         this.categoryID = categoryID;
         this.amount = amount;
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public Budget(int budgetID, int categoryID, double amount, Date startDate, Date endDate) {
-        this.budgetID = budgetID;
-        this.categoryID = categoryID;
-        this.amount = amount;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
     // Getters and setters
 
     public int getBudgetID() {
