@@ -27,11 +27,11 @@ public class SampleDataInitializer {
                     // 1. Dữ liệu mẫu cho bảng User
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
                             " (email, password, role) VALUES " +
-                            "('test@example.com', 'password123', 'User'), " +
-                            "('admin@example.com', 'admin123', 'Admin'), " +
-                            "('user2@example.com', 'pass456', 'User'), " +
-                            "('user3@example.com', 'secure789', 'User'), " +
-                            "('admin2@example.com', 'admin2025', 'Admin')");
+                            "('test@example.com', 'password123', 'user'), " +
+                            "('admin@example.com', 'admin123', 'admin'), " +
+                            "('user2@example.com', 'pass456', 'user'), " +
+                            "('user3@example.com', 'secure789', 'user'), " +
+                            "('admin2@example.com', 'admin2025', 'admin')");
 
                     // 2. Dữ liệu mẫu cho bảng ExpenseCategory
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
