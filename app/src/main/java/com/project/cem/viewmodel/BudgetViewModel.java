@@ -9,11 +9,9 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-
 import com.project.cem.model.Budget;
 import com.project.cem.model.ExpenseCategory;
 import com.project.cem.repository.BudgetRepository;
-
 
 import java.util.List;
 
@@ -21,7 +19,7 @@ public class BudgetViewModel extends AndroidViewModel {
 
     private BudgetRepository budgetRepository;
     private MutableLiveData<List<Budget>> allBudgets;
-    private  MutableLiveData<String> messageLiveData = new MutableLiveData<>();;
+    private MutableLiveData<String> messageLiveData = new MutableLiveData<>();
     private LiveData<List<ExpenseCategory>> allCategories;
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -31,12 +29,12 @@ public class BudgetViewModel extends AndroidViewModel {
         budgetRepository = new BudgetRepository(application);
         allBudgets = budgetRepository.getAllBudgets();
         allCategories = new MutableLiveData<>(budgetRepository.getAllCategories());
-
     }
 
     public LiveData<List<Budget>> getAllBudgets() {
         return allBudgets;
     }
+
     public LiveData<String> getMessageLiveData() {
         return messageLiveData;
     }
@@ -56,6 +54,12 @@ public class BudgetViewModel extends AndroidViewModel {
         new Thread(() -> {
             long result = budgetRepository.insert(budget);
             new Handler(Looper.getMainLooper()).post(() -> {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 isLoading.setValue(false);
                 if (result != -1) {
                     messageLiveData.setValue("Budget added successfully!");
@@ -69,10 +73,10 @@ public class BudgetViewModel extends AndroidViewModel {
             });
         }).start();
     }
+
     public void refreshBudgets() {
         allBudgets.setValue(budgetRepository.getAllBudgets().getValue());
     }
-
 
     public void update(Budget budget) {
         isLoading.setValue(true);
@@ -81,6 +85,13 @@ public class BudgetViewModel extends AndroidViewModel {
         new Thread(() -> {
             int rowsAffected = budgetRepository.update(budget);
             new Handler(Looper.getMainLooper()).post(() -> {
+
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 isLoading.setValue(false);
                 if (rowsAffected > 0) {
                     messageLiveData.setValue("Budget updated successfully!");
@@ -93,8 +104,8 @@ public class BudgetViewModel extends AndroidViewModel {
             });
         }).start();
     }
+
     public LiveData<List<ExpenseCategory>> getAllCategories() {
         return allCategories;
     }
-
 }
