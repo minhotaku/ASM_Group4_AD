@@ -41,10 +41,10 @@ public class BudgetFragment extends Fragment {
     private EditText edtEndDate;
     private Button btnSave;
     private RecyclerView rclViewBudgets;
-    private ProgressBar progressBar;
     private BudgetsAdapter budgetsAdapter;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private ProgressBar progressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,6 +75,9 @@ public class BudgetFragment extends Fragment {
                     android.R.layout.simple_spinner_item, getCategoryNames(categories));
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spnCategory.setAdapter(adapter);
+            for (ExpenseCategory category : categories) {
+                Log.d("BudgetFragment", "Category ID: " + category.getCategoryID() + ", Name: " + category.getCategoryName());
+            }
         });
 
         budgetViewModel.getAllBudgets().observe(getViewLifecycleOwner(), budgets -> {
@@ -146,19 +149,14 @@ public class BudgetFragment extends Fragment {
         try {
             Date startDate = dateFormat.parse(startDateStr);
             Date endDate = dateFormat.parse(endDateStr);
-            Budget newBudget = new Budget();
-            newBudget.setCategoryID(categoryId);
-            newBudget.setAmount(amount);
-            newBudget.setStartDate(startDate);
-            newBudget.setEndDate(endDate);
+            Budget newBudget = new Budget(categoryId, amount, startDate, endDate);
             budgetViewModel.insert(newBudget);
 
         }
         catch (Exception e){
+            Log.e("BudgetFragment", "Error parsing date or inserting budget", e);
             Toast.makeText(getContext(), "date faild", Toast.LENGTH_SHORT).show();
         }
-
-
     }
     private List<String> getCategoryNames(List<ExpenseCategory> categories) {
         List<String> names = new ArrayList<>();

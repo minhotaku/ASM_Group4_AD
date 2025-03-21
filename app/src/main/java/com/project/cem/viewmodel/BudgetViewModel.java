@@ -62,6 +62,7 @@ public class BudgetViewModel extends AndroidViewModel {
                     List<Budget> updatedList = budgetRepository.getAllBudgets().getValue();
                     Log.d("BudgetViewModel", "insert - Updated budget list size: " + (updatedList != null ? updatedList.size() : "null"));
                     allBudgets.setValue(updatedList);
+
                 } else {
                     errorMessage.setValue("Failed to add budget.");
                 }
@@ -83,7 +84,9 @@ public class BudgetViewModel extends AndroidViewModel {
                 isLoading.setValue(false);
                 if (rowsAffected > 0) {
                     messageLiveData.setValue("Budget updated successfully!");
-                    allBudgets.setValue(budgetRepository.getAllBudgets().getValue());
+                    List<Budget> updatedList = budgetRepository.getAllBudgets().getValue();
+                    Log.d("BudgetViewModel", "update - Updated budget list size: " + (updatedList != null ? updatedList.size() : "null"));
+                    allBudgets.setValue(updatedList);
                 } else {
                     errorMessage.setValue("Failed to update budget.");
                 }
