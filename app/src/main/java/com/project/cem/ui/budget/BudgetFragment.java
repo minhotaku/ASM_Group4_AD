@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.project.cem.R;
 import com.project.cem.model.Budget;
 import com.project.cem.model.ExpenseCategory;
+import com.project.cem.utils.UserPreferences;
 import com.project.cem.viewmodel.BudgetViewModel;
 
 import java.text.SimpleDateFormat;
@@ -41,8 +42,8 @@ public class BudgetFragment extends Fragment {
     private EditText edtEndDate;
     private Button btnSave;
     private ProgressBar progressBar;
-    private RecyclerView rclViewBudgets;
-    private BudgetsAdapter budgetsAdapter;
+    //private RecyclerView rclViewBudgets; // Sửa: Không cần khai báo ở đây
+    //private BudgetsAdapter budgetsAdapter; // Sửa: Không cần khai báo ở đây
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
@@ -57,13 +58,15 @@ public class BudgetFragment extends Fragment {
         edtEndDate = view.findViewById(R.id.edt_end_date);
         btnSave = view.findViewById(R.id.btn_save);
         progressBar = view.findViewById(R.id.progress_bar);
-        rclViewBudgets = view.findViewById(R.id.rcl_view_budgets);
+        RecyclerView rclViewBudgets = view.findViewById(R.id.rcl_view_budgets); // Sửa: Khai báo tại đây
 
         rclViewBudgets.setLayoutManager(new LinearLayoutManager(getContext()));
-        budgetsAdapter = new BudgetsAdapter(new ArrayList<>(), categoriesList, budgetViewModel);
+        BudgetsAdapter budgetsAdapter = new BudgetsAdapter(new ArrayList<>(), categoriesList, budgetViewModel); // Sửa: Khai báo tại đây
         rclViewBudgets.setAdapter(budgetsAdapter);
 
+
         budgetViewModel = new ViewModelProvider(this).get(BudgetViewModel.class);
+
 
         budgetViewModel.getAllCategories().observe(getViewLifecycleOwner(), categories -> {
             categoriesList.clear();
@@ -72,16 +75,17 @@ public class BudgetFragment extends Fragment {
                     android.R.layout.simple_spinner_item, getCategoryNames(categories));
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spnCategory.setAdapter(adapter);
+
+            // Cập nhật categories trong adapter:
+            budgetsAdapter.setCategories(categoriesList);  // Sửa
             for (ExpenseCategory category : categories) {
                 Log.d("BudgetFragment", "Category ID: " + category.getCategoryID() + ", Name: " + category.getCategoryName());
             }
-
-            budgetsAdapter.setCategories(categoriesList);
         });
 
         budgetViewModel.getAllBudgets().observe(getViewLifecycleOwner(), budgets -> {
             Log.d("BudgetFragment", "Observer triggered, budget list size: " + (budgets != null ? budgets.size() : "null"));
-            budgetsAdapter.setBudgets(budgets);
+            budgetsAdapter.setBudgets(budgets); // Sửa
         });
 
         edtStartDate.setOnClickListener(v -> showDatePickerDialog(edtStartDate));
@@ -148,7 +152,15 @@ public class BudgetFragment extends Fragment {
         try {
             Date startDate = dateFormat.parse(startDateStr);
             Date endDate = dateFormat.parse(endDateStr);
-            Budget newBudget = new Budget(categoryId, amount, startDate, endDate);
+
+            com.project.cem.model.User user = UserPreferences.getUser(getContext());
+            if (user == null) {
+                Log.e("BudgetFragment", "User is null. Cannot save budget.");
+                Toast.makeText(getContext(), "User is null. Cannot save budget.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Budget newBudget = new Budget(0, user.getUserID(), categoryId, amount, startDate, endDate);
             budgetViewModel.insert(newBudget);
 
         }

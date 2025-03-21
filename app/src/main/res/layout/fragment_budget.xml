@@ -12,26 +12,29 @@
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Budget"
         android:textAlignment="center"
         android:textSize="24sp"
         android:textStyle="bold|italic"
+        android:text="Budget Management"
         android:layout_marginTop="24dp"
         android:layout_marginBottom="24dp" />
 
     <Spinner
         android:id="@+id/spn_category"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp" />
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="Select Category"/>
 
     <EditText
         android:id="@+id/edt_amount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Budget Amount"
+        android:layout_marginBottom="8dp"
+        android:autofillHints="amount"
+        android:hint="Amount"
         android:inputType="numberDecimal"
-        android:layout_marginBottom="8dp" />
+        android:minHeight="48dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -42,27 +45,35 @@
         <EditText
             android:id="@+id/edt_start_date"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:hint="Start Date"
-            android:focusable="false"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:autofillHints="date"
             android:clickable="true"
-            android:layout_marginEnd="8dp" />
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="Start Date"
+            android:inputType="date"
+            android:minHeight="48dp" />
 
         <EditText
             android:id="@+id/edt_end_date"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:hint="End Date"
+            android:layout_weight="1"
+            android:autofillHints="date"
+            android:clickable="true"
             android:focusable="false"
-            android:clickable="true" />
+            android:focusableInTouchMode="false"
+            android:hint="End Date"
+            android:inputType="date"
+            android:minHeight="48dp" />
     </LinearLayout>
 
     <Button
         android:id="@+id/btn_save"
         android:layout_width="115dp"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
         android:background="@drawable/btn_custom"
@@ -82,5 +93,6 @@
         android:id="@+id/rcl_view_budgets"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:contentDescription="List of budgets"/>
 </LinearLayout>

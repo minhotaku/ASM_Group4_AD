@@ -30,6 +30,7 @@ public class BudgetsAdapter extends RecyclerView.Adapter<BudgetsAdapter.BudgetVi
         this.categoriesList = categories;
         this.budgetViewModel = budgetViewModel;
     }
+
     @NonNull
     @Override
     public BudgetViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -61,7 +62,6 @@ public class BudgetsAdapter extends RecyclerView.Adapter<BudgetsAdapter.BudgetVi
         }
         return "Unknown Category";
     }
-
     @Override
     public int getItemCount() {
         return budgets.size();

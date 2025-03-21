@@ -41,7 +41,7 @@ public class BudgetRepository {
 
         com.project.cem.model.User user = UserPreferences.getUser(context);
         if (user != null) {
-            values.put("userID", user.getUserID());
+            values.put("userID", budget.getUserID());
         } else {
             Log.e("BudgetRepository", "User is null, cannot insert userID.");
             return -1;
@@ -52,7 +52,6 @@ public class BudgetRepository {
         Log.d("BudgetRepository", "Insert result (newRowId): " + newRowId);
         return newRowId;
     }
-
     public MutableLiveData<List<Budget>> getAllBudgets() {
         MutableLiveData<List<Budget>> budgetsLiveData = new MutableLiveData<>();
         List<Budget> budgetList = new ArrayList<>();
@@ -74,6 +73,7 @@ public class BudgetRepository {
 
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
 
+
         if (cursor != null) {
             Log.d("BudgetRepository", "getAllBudgets - Number of budgets found: " + cursor.getCount());
         } else {
@@ -93,13 +93,17 @@ public class BudgetRepository {
                     Date startDate = dateFormat.parse(startDateStr);
                     Date endDate = dateFormat.parse(endDateStr);
 
-                    Budget budget = new Budget(budgetId, categoryId, amount, startDate, endDate);
+                    Budget budget = new Budget(budgetId, userId, categoryId, amount, startDate, endDate);
+
                     budgetList.add(budget);
+
+
                 } catch (ParseException e) {
                     Log.e("BudgetRepository", "Error parsing date", e);
                 }
             } while (cursor.moveToNext());
         }
+
         if (cursor != null) {
             cursor.close();
         }
@@ -108,6 +112,8 @@ public class BudgetRepository {
         budgetsLiveData.setValue(budgetList);
         return budgetsLiveData;
     }
+
+
     public int update(Budget budget) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -117,16 +123,15 @@ public class BudgetRepository {
         values.put("endDate", dateFormat.format(budget.getEndDate()));
 
         com.project.cem.model.User user = UserPreferences.getUser(context);
-        if(user != null){
+        if (user != null) {
             values.put("userID", user.getUserID());
-        }
-        else {
+        } else {
             Log.e("BudgetRepository", "User is null, cannot update userID.");
             return -1;
         }
 
         String selection = "budgetID = ?";
-        String[] selectionArgs = {String.valueOf(budget.getBudgetID())};
+        String[] selectionArgs = { String.valueOf(budget.getBudgetID()) };
 
         int count = db.update(SQLiteHelper.TABLE_BUDGET, values, selection, selectionArgs);
         db.close();
@@ -138,22 +143,12 @@ public class BudgetRepository {
         List<ExpenseCategory> categories = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         com.project.cem.model.User user = UserPreferences.getUser(context);
-
         if (user == null) {
-            Log.e("BudgetRepository", "getAllCategories - User is NULL!");
             return categories;
         }
 
-        Log.d("BudgetRepository", "getAllCategories - UserID: " + user.getUserID());
-        String query = "SELECT * FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY+ " WHERE userID = ?";
-
+        String query = "SELECT categoryID, categoryName, userID FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " WHERE userID = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(user.getUserID())});
-
-        if (cursor != null) {
-            Log.d("BudgetRepository", "getAllCategories - Number of categories found: " + cursor.getCount());
-        } else {
-            Log.d("BudgetRepository", "getAllCategories - Cursor is NULL!");
-        }
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
@@ -163,8 +158,7 @@ public class BudgetRepository {
                 categories.add(new ExpenseCategory(id, userId, name));
             } while (cursor.moveToNext());
             cursor.close();
-        }
-        else {
+        } else {
             Log.d("BudgetRepository", "getAllCategories - Cursor is empty or null.");
         }
         db.close();
