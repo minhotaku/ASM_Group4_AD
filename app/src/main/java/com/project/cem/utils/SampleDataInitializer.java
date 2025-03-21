@@ -21,84 +21,78 @@ public class SampleDataInitializer {
                 .getBoolean(KEY_INITIALIZED, false);
 
         if (!isInitializedInPrefs && !isDataInitialized) {
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            db.beginTransaction();
-            try {
-                // 1. Dữ liệu mẫu cho bảng ExpenseCategory
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
-                        " (categoryName) VALUES ('Food')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
-                        " (categoryName) VALUES ('Transportation')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
-                        " (categoryName) VALUES ('Entertainment')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
-                        " (categoryName) VALUES ('Housing')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
-                        " (categoryName) VALUES ('Utilities')");
+            try (SQLiteDatabase db = dbHelper.getWritableDatabase()) {
+                db.beginTransaction();
+                try {
+                    // 1. Dữ liệu mẫu cho bảng User
+                    db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
+                            " (email, password, role) VALUES " +
+                            "('test@example.com', 'password123', 'User'), " +
+                            "('admin@example.com', 'admin123', 'Admin'), " +
+                            "('user2@example.com', 'pass456', 'User'), " +
+                            "('user3@example.com', 'secure789', 'User'), " +
+                            "('admin2@example.com', 'admin2025', 'Admin')");
 
-                // 2. Dữ liệu mẫu cho bảng User
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
-                        " (email, password, role) VALUES ('test@example.com', 'password123', 'user')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
-                        " (email, password, role) VALUES ('admin@example.com', 'admin123', 'admin')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
-                        " (email, password, role) VALUES ('user2@example.com', 'pass456', 'user')");
+                    // 2. Dữ liệu mẫu cho bảng ExpenseCategory
+                    db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
+                            " (userID, categoryName) VALUES " +
+                            "(1, 'Food'), " +
+                            "(1, 'Transportation'), " +
+                            "(2, 'Entertainment'), " +
+                            "(3, 'Housing'), " +
+                            "(3, 'Utilities'), " +
+                            "(4, 'Health'), " +
+                            "(5, 'Education')");
 
-                // 3. Dữ liệu mẫu cho bảng Expense (Đã sửa lỗi "penal amount" thành "amount")
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE +
-                        " (userID, categoryID, description, amount, date) " +  // Sửa ở đây
-                        "VALUES (1, 1, 'Lunch at Cafe', 15.50, '2025-03-20')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE +
-                        " (userID, categoryID, description, amount, date) " +
-                        "VALUES (1, 2, 'Bus ticket', 2.75, '2025-03-20')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE +
-                        " (userID, categoryID, description, amount, date) " +
-                        "VALUES (2, 3, 'Movie night', 12.00, '2025-03-19')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE +
-                        " (userID, categoryID, description, amount, date) " +
-                        "VALUES (3, 4, 'Rent payment', 800.00, '2025-03-01')");
+                    // 3. Dữ liệu mẫu cho bảng Expense
+                    db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE +
+                            " (userID, categoryID, description, amount, date) VALUES " +
+                            "(1, 1, 'Lunch at Cafe', 15.50, '2025-03-20'), " +
+                            "(1, 2, 'Bus ticket', 2.75, '2025-03-20'), " +
+                            "(2, 3, 'Movie night', 12.00, '2025-03-19'), " +
+                            "(3, 4, 'Rent payment', 800.00, '2025-03-01'), " +
+                            "(4, 5, 'University tuition', 1500.00, '2025-02-25'), " +
+                            "(5, 6, 'Medical checkup', 120.00, '2025-03-10')");
 
-                // 4. Dữ liệu mẫu cho bảng Budget
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_BUDGET +
-                        " (categoryID, amount, startDate, endDate) " +
-                        "VALUES (1, 200.00, '2025-03-01', '2025-03-31')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_BUDGET +
-                        " (categoryID, amount, startDate, endDate) " +
-                        "VALUES (2, 100.00, '2025-03-01', '2025-03-31')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_BUDGET +
-                        " (categoryID, amount, startDate, endDate) " +
-                        "VALUES (3, 150.00, '2025-03-01', '2025-03-31')");
+                    // 4. Dữ liệu mẫu cho bảng Budget
+                    db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_BUDGET +
+                            " (userID, categoryID, amount, startDate, endDate) VALUES " +
+                            "(1, 1, 200.00, '2025-03-01', '2025-03-31'), " +
+                            "(1, 2, 100.00, '2025-03-01', '2025-03-31'), " +
+                            "(2, 3, 150.00, '2025-03-01', '2025-03-31'), " +
+                            "(3, 4, 1000.00, '2025-03-01', '2025-03-31'), " +
+                            "(4, 5, 2000.00, '2025-03-01', '2025-03-31'), " +
+                            "(5, 6, 500.00, '2025-03-01', '2025-03-31')");
 
-                // 5. Dữ liệu mẫu cho bảng RecurringExpense
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
-                        " (userID, categoryID, description, startDate, endDate, recurrenceFrequency) " +
-                        "VALUES (1, 5, 'Electricity bill', '2025-03-01', '2025-12-31', 'Monthly')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
-                        " (userID, categoryID, description, startDate, endDate, recurrenceFrequency) " +
-                        "VALUES (2, 4, 'Monthly rent', '2025-03-01', '2025-12-31', 'Monthly')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
-                        " (userID, categoryID, description, startDate, endDate, recurrenceFrequency) " +
-                        "VALUES (3, 2, 'Weekly bus pass', '2025-03-01', '2025-06-30', 'Weekly')");
+                    // 5. Dữ liệu mẫu cho bảng RecurringExpense
+                    db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
+                            " (userID, categoryID, description, startDate, endDate, recurrenceFrequency) VALUES " +
+                            "(1, 5, 'Electricity bill', '2025-03-01', '2025-12-31', 'Monthly'), " +
+                            "(2, 4, 'Monthly rent', '2025-03-01', '2025-12-31', 'Monthly'), " +
+                            "(3, 2, 'Weekly bus pass', '2025-03-01', '2025-06-30', 'Weekly'), " +
+                            "(4, 5, 'Quarterly education fee', '2025-03-01', '2025-12-31', 'Quarterly'), " +
+                            "(5, 6, 'Health insurance', '2025-03-01', '2025-12-31', 'Annually')");
 
-                // 6. Dữ liệu mẫu cho bảng ExpenseReport
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_REPORT +
-                        " (userID, generatedDate, reportData) " +
-                        "VALUES (1, '2025-03-20 10:00:00', 'Monthly expense report for March')");
-                db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_REPORT +
-                        " (userID, generatedDate, reportData) " +
-                        "VALUES (2, '2025-03-19 15:30:00', 'Weekly expense summary')");
+                    // 6. Dữ liệu mẫu cho bảng ExpenseReport
+                    db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_REPORT +
+                            " (userID, generatedDate, reportData) VALUES " +
+                            "(1, '2025-03-20 10:00:00', 'Monthly expense report for March'), " +
+                            "(2, '2025-03-19 15:30:00', 'Weekly expense summary'), " +
+                            "(3, '2025-03-25 09:00:00', 'Rent and utilities report'), " +
+                            "(4, '2025-03-15 14:30:00', 'University expenses'), " +
+                            "(5, '2025-03-28 18:00:00', 'Health and insurance expenses')");
 
-                // Đánh dấu đã khởi tạo trong SharedPreferences
-                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                        .edit()
-                        .putBoolean(KEY_INITIALIZED, true)
-                        .apply();
+                    // Đánh dấu đã khởi tạo trong SharedPreferences
+                    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                            .edit()
+                            .putBoolean(KEY_INITIALIZED, true)
+                            .apply();
 
-                isDataInitialized = true;
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-                db.close();
+                    isDataInitialized = true;
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
             }
         }
     }

@@ -2,13 +2,15 @@ package com.project.cem.model;
 
 public class ExpenseCategory {
     private int categoryID;
+    private int userID;
     private String categoryName;
 
     public ExpenseCategory() {
     }
 
-    public ExpenseCategory(int categoryID, String categoryName) {
+    public ExpenseCategory(int categoryID, int userID, String categoryName) {
         this.categoryID = categoryID;
+        this.userID = userID;
         this.categoryName = categoryName;
     }
 
@@ -18,6 +20,14 @@ public class ExpenseCategory {
 
     public void setCategoryID(int categoryID) {
         this.categoryID = categoryID;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
     public String getCategoryName() {

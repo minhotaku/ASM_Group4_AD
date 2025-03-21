@@ -2,6 +2,7 @@ package com.project.cem.model;
 import java.util.Date;
 public class Budget {
     private int budgetID;
+    private int userID;
     private int categoryID;
     private double amount;
     private Date startDate;
@@ -10,13 +11,16 @@ public class Budget {
     public Budget() {
     }
 
-    public Budget(int budgetID, int categoryID, double amount, Date startDate, Date endDate) {
+    public Budget(int budgetID, int userID, int categoryID, double amount, Date startDate, Date endDate) {
         this.budgetID = budgetID;
+        this.userID = userID;
         this.categoryID = categoryID;
         this.amount = amount;
         this.startDate = startDate;
         this.endDate = endDate;
     }
+
+
 
     public int getBudgetID() {
         return budgetID;
@@ -24,6 +28,14 @@ public class Budget {
 
     public void setBudgetID(int budgetID) {
         this.budgetID = budgetID;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
     public int getCategoryID() {
