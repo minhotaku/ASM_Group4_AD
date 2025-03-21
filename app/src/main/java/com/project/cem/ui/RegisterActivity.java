@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,7 +19,8 @@ import com.project.cem.viewmodel.RegisterViewModel;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText edtRegisterEmail, edtRegisterPassword;
-    private Button btnRegister, btnBackToLogin;
+    private Button btnRegister;
+    private TextView textViewMoveLogin;
     private RegisterViewModel registerViewModel;
 
     @Override
@@ -30,8 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
         edtRegisterEmail = findViewById(R.id.edtRegisterEmail);
         edtRegisterPassword = findViewById(R.id.edtRegisterPassword);
         btnRegister = findViewById(R.id.btnRegister);
-        btnBackToLogin = findViewById(R.id.btnBackToLogin);
-
+        textViewMoveLogin = findViewById(R.id.textViewMoveLogin);
 
         registerViewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
         btnRegister.setOnClickListener(v -> {
@@ -45,7 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
 
-        btnBackToLogin.setOnClickListener(v -> {
+        textViewMoveLogin.setOnClickListener(v -> {
             navigateLogin();
                 });
 

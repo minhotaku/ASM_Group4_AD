@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".ui.budget.EditBudgetFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit Budget"
+        android:textAlignment="center"
+        android:layout_marginTop="24dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <Spinner
+        android:id="@+id/edit_spn_category"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="Select Category"/>
+
+    <EditText
+        android:id="@+id/edit_edt_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Amount"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="8dp"
+        android:autofillHints="amount"
+        android:minHeight="48dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <EditText
+            android:id="@+id/edit_edt_start_date"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="Start Date"
+            android:focusable="false"
+            android:clickable="true"
+            android:focusableInTouchMode="false"
+            android:inputType="date"
+            android:layout_marginEnd="8dp"
+            android:autofillHints="date"
+            android:minHeight="48dp"/>
+
+        <EditText
+            android:id="@+id/edit_edt_end_date"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="End Date"
+            android:focusable="false"
+            android:clickable="true"
+            android:focusableInTouchMode="false"
+            android:inputType="date"
+            android:autofillHints="date"
+            android:minHeight="48dp"/>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/edit_btn_update"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="Update"
+        android:background="@drawable/btn_custom"
+        app:backgroundTint="@null"
+        android:layout_gravity="center_horizontal"/>
+
+</LinearLayout>

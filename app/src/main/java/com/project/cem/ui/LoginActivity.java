@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,9 +14,11 @@ import com.project.cem.utils.SampleDataInitializer;
 import com.project.cem.utils.UserPreferences;
 import com.project.cem.viewmodel.LoginViewModel;
 
+
 public class LoginActivity extends AppCompatActivity {
     private EditText edtEmail, edtPassword;
-    private Button btnLogin, btnNavigateRegister;
+    private TextView textViewMoveRegister;
+    private Button btnLogin;
     private LoginViewModel loginViewModel;
 
     @Override
@@ -36,11 +39,10 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         // Khởi tạo các view
-        edtEmail = findViewById(R.id.edtEmail);
-        edtPassword = findViewById(R.id.edtPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        btnNavigateRegister = findViewById(R.id.btnNavigateRegister);
-
+        edtEmail = findViewById(R.id.edtRegisterEmail);
+        edtPassword = findViewById(R.id.edtRegisterPassword);
+        btnLogin = findViewById(R.id.btnRegister);
+        textViewMoveRegister = findViewById(R.id.textViewMoveLogin);
         // Khởi tạo LoginViewModel
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
@@ -60,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
 
-        btnNavigateRegister.setOnClickListener(v -> {
+        textViewMoveRegister.setOnClickListener(v -> {
             navigateRegister();
         });
 
