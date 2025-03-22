@@ -24,7 +24,7 @@ public class SampleDataInitializer {
             try (SQLiteDatabase db = dbHelper.getWritableDatabase()) {
                 db.beginTransaction();
                 try {
-                    // 1. Dữ liệu mẫu cho bảng User
+                    // 1. Dữ liệu mẫu cho bảng User (không thay đổi)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_USER +
                             " (email, password, role) VALUES " +
                             "('test@example.com', 'password123', 'user'), " +
@@ -33,7 +33,7 @@ public class SampleDataInitializer {
                             "('user3@example.com', 'secure789', 'user'), " +
                             "('admin2@example.com', 'admin2025', 'admin')");
 
-                    // 2. Dữ liệu mẫu cho bảng ExpenseCategory
+                    // 2. Dữ liệu mẫu cho bảng ExpenseCategory (không thay đổi)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
                             " (userID, categoryName) VALUES " +
                             "(1, 'Food'), " +
@@ -44,7 +44,7 @@ public class SampleDataInitializer {
                             "(4, 'Health'), " +
                             "(5, 'Education')");
 
-                    // 3. Dữ liệu mẫu cho bảng Expense
+                    // 3. Dữ liệu mẫu cho bảng Expense (không thay đổi)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE +
                             " (userID, categoryID, description, amount, date) VALUES " +
                             "(1, 1, 'Lunch at Cafe', 15.50, '2025-03-20'), " +
@@ -54,26 +54,26 @@ public class SampleDataInitializer {
                             "(4, 5, 'University tuition', 1500.00, '2025-02-25'), " +
                             "(5, 6, 'Medical checkup', 120.00, '2025-03-10')");
 
-                    // 4. Dữ liệu mẫu cho bảng Budget (with year and month)
+                    // 4. Dữ liệu mẫu cho bảng Budget (sửa startDate, endDate thành month, year)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_BUDGET +
-                            " (userID, categoryID, amount, year, month) VALUES " +
-                            "(1, 1, 200.00, 2025, 3), " +
-                            "(1, 2, 100.00, 2025, 3), " +
-                            "(2, 3, 150.00, 2025, 3), " +
-                            "(3, 4, 1000.00, 2025, 3), " +
-                            "(4, 5, 2000.00, 2025, 3), " +
-                            "(5, 6, 500.00, 2025, 3)");
+                            " (userID, categoryID, amount, month, year) VALUES " +
+                            "(1, 1, 200.00, 3, 2025), " +
+                            "(1, 2, 100.00, 3, 2025), " +
+                            "(2, 3, 150.00, 3, 2025), " +
+                            "(3, 4, 1000.00, 3, 2025), " +
+                            "(4, 5, 2000.00, 3, 2025), " +
+                            "(5, 6, 500.00, 3, 2025)");
 
-                    // 5. Dữ liệu mẫu cho bảng RecurringExpense (adjusted according to schema)
+                    // 5. Dữ liệu mẫu cho bảng RecurringExpense (sửa startDate, endDate thành month, year, thêm amount, giới hạn recurrenceFrequency)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
-                            " (userID, categoryID, description, year, month) VALUES " +
-                            "(1, 5, 'Electricity bill', 2025, 3), " +
-                            "(2, 4, 'Monthly rent', 2025, 3), " +
-                            "(3, 2, 'Weekly bus pass', 2025, 3), " +
-                            "(4, 5, 'Quarterly education fee', 2025, 3), " +
-                            "(5, 6, 'Health insurance', 2025, 3)");
+                            " (userID, categoryID, description, amount, month, year, recurrenceFrequency) VALUES " +
+                            "(1, 5, 'Electricity bill', 50.00, 3, 2025, 'Month'), " +
+                            "(2, 4, 'Monthly rent', 800.00, 3, 2025, 'Month'), " +
+                            "(3, 2, 'Monthly bus pass', 30.00, 3, 2025, 'Month'), " +
+                            "(4, 5, 'Annual education fee', 1500.00, 3, 2025, 'Year'), " +
+                            "(5, 6, 'Health insurance', 1200.00, 3, 2025, 'Year')");
 
-                    // 6. Dữ liệu mẫu cho bảng ExpenseReport
+                    // 6. Dữ liệu mẫu cho bảng ExpenseReport (không thay đổi)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_REPORT +
                             " (userID, generatedDate, reportData) VALUES " +
                             "(1, '2025-03-20 10:00:00', 'Monthly expense report for March'), " +

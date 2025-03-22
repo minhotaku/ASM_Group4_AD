@@ -7,20 +7,19 @@ public class Budget {
     private int userID;
     private int categoryID;
     private double amount;
-    private int year;
     private int month;
+    private int year;
 
     public Budget() {
     }
 
-    public Budget(int budgetID, int userID, int categoryID, double amount, int year, int month) {
-
+    public Budget(int budgetID, int userID, int categoryID, double amount, int month, int year) {
         this.budgetID = budgetID;
         this.userID = userID;
         this.categoryID = categoryID;
         this.amount = amount;
-        this.year = year;
         this.month = month;
+        this.year = year;
     }
 
     public int getBudgetID() {
