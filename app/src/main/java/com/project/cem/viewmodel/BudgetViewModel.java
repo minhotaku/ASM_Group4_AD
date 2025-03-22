@@ -82,6 +82,15 @@ public class BudgetViewModel extends AndroidViewModel {
         messageLiveData.postValue(null);
 
         new Thread(() -> {
+            // Kiểm tra nếu startDate lớn hơn endDate
+            if (budget.getStartDate().after(budget.getEndDate())) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    isLoading.setValue(false);
+                    errorMessage.setValue("Invalid date range: The start date cannot be later than the end date.");
+                });
+                return;
+            }
+
             if (isBudgetOverlapping(db, budget)) {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     isLoading.setValue(false);
@@ -96,7 +105,7 @@ public class BudgetViewModel extends AndroidViewModel {
                 isLoading.setValue(false);
                 if (success) {
                     messageLiveData.setValue("Budget added successfully!");
-                    errorMessage.setValue(null);  //Clear error message
+                    errorMessage.setValue(null);  // Clear error message
                     refreshBudgets();
                     checkBudgets();
                 } else {
@@ -106,12 +115,22 @@ public class BudgetViewModel extends AndroidViewModel {
         }).start();
     }
 
+
     public void update(Budget budget) {
         isLoading.postValue(true);
-        errorMessage.postValue(null);  //Clear error
+        errorMessage.postValue(null);  // Clear error
         messageLiveData.postValue(null);
 
         new Thread(() -> {
+            // Kiểm tra nếu startDate lớn hơn endDate
+            if (budget.getStartDate().after(budget.getEndDate())) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    isLoading.setValue(false);
+                    errorMessage.setValue("Invalid date range: The start date cannot be later than the end date.");
+                });
+                return;
+            }
+
             if (isBudgetOverlapping(db, budget)) {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     isLoading.setValue(false);
@@ -135,6 +154,7 @@ public class BudgetViewModel extends AndroidViewModel {
             });
         }).start();
     }
+
     public void refreshBudgets() {
         new Thread(() -> {
             List<Budget> updatedList = budgetRepository.getAllBudgets(db);
