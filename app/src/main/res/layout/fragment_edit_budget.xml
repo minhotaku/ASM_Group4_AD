@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -42,32 +41,18 @@
         android:orientation="horizontal"
         android:layout_marginBottom="8dp">
 
-        <EditText
-            android:id="@+id/edit_edt_start_date"
+        <NumberPicker
+            android:id="@+id/edit_np_month"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:hint="Start Date"
-            android:focusable="false"
-            android:clickable="true"
-            android:focusableInTouchMode="false"
-            android:inputType="date"
-            android:layout_marginEnd="8dp"
-            android:autofillHints="date"
-            android:minHeight="48dp"/>
+            android:layout_marginEnd="8dp"/>
 
-        <EditText
-            android:id="@+id/edit_edt_end_date"
+        <NumberPicker
+            android:id="@+id/edit_np_year"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:hint="End Date"
-            android:focusable="false"
-            android:clickable="true"
-            android:focusableInTouchMode="false"
-            android:inputType="date"
-            android:autofillHints="date"
-            android:minHeight="48dp"/>
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
     <LinearLayout

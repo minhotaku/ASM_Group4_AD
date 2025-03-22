@@ -1,7 +1,6 @@
 package com.project.cem.ui.budget;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -32,6 +34,8 @@ public class BudgetFragment extends Fragment {
     private ImageView btnAddBudget;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    // Add this
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -89,7 +93,29 @@ public class BudgetFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        budgetViewModel.checkBudgets();
+        //budgetViewModel.checkBudgets(); // NO LONGER NEEDED HERE - handled by the Handler
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        budgetViewModel = new ViewModelProvider(requireActivity()).get(BudgetViewModel.class);
+
+        // Register the permission callback, which handles the user's response
+        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                // Permission granted.  You can now post notifications.
+                Toast.makeText(requireContext(), "Notifications permission granted", Toast.LENGTH_SHORT).show();
+                // You might want to call checkBudgets() here, or enable a setting
+            } else {
+                // Permission denied.  Explain to the user why you need the permission
+                Toast.makeText(requireContext(), "Notifications permission denied", Toast.LENGTH_LONG).show();
+                // You should disable notification-related functionality, or provide
+                // a way for the user to grant the permission later.
+                // You might want to show a dialog explaining why you need the permission.
+            }
+        });
+        budgetViewModel.setRequestPermissionLauncher(requestPermissionLauncher);
     }
     private List<String> getCategoryNames(List<ExpenseCategory> categories) {
         List<String> names = new ArrayList<>();

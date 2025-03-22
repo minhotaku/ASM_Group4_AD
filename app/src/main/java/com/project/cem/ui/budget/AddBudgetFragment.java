@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.NumberPicker; // Import NumberPicker
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -40,13 +41,13 @@ public class AddBudgetFragment extends Fragment {
     private BudgetViewModel budgetViewModel;
     private Spinner spnCategory;
     private EditText edtAmount;
-    private EditText edtStartDate;
-    private EditText edtEndDate;
+    // Replace Date EditTexts with NumberPickers
+    private NumberPicker monthPicker;
+    private NumberPicker yearPicker;
     private Button btnSave;
     private ProgressBar progressBar;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-    private final DecimalFormat decimalFormat = new DecimalFormat("#,###");
+    private final DecimalFormat decimalFormat = new DecimalFormat("#,###"); // Format for display
     private String current = "";
 
     @Nullable
@@ -56,10 +57,14 @@ public class AddBudgetFragment extends Fragment {
 
         spnCategory = view.findViewById(R.id.add_spn_category);
         edtAmount = view.findViewById(R.id.add_edt_amount);
-        edtStartDate = view.findViewById(R.id.add_edt_start_date);
-        edtEndDate = view.findViewById(R.id.add_edt_end_date);
+        // Initialize NumberPickers
+        monthPicker = view.findViewById(R.id.add_np_month);
+        yearPicker = view.findViewById(R.id.add_np_year);
         btnSave = view.findViewById(R.id.add_btn_save);
         progressBar = view.findViewById(R.id.progress_bar);
+
+        // Set up NumberPickers
+        setupNumberPickers();
 
         budgetViewModel = new ViewModelProvider(requireActivity()).get(BudgetViewModel.class);
 
@@ -72,8 +77,6 @@ public class AddBudgetFragment extends Fragment {
             spnCategory.setAdapter(adapter);
         });
 
-        edtStartDate.setOnClickListener(v -> showDatePickerDialog(edtStartDate));
-        edtEndDate.setOnClickListener(v -> showDatePickerDialog(edtEndDate));
 
         btnSave.setOnClickListener(v -> saveBudget());
         edtAmount.addTextChangedListener(onTextChangedListener());
@@ -89,7 +92,6 @@ public class AddBudgetFragment extends Fragment {
         });
         return view;
     }
-
     private TextWatcher onTextChangedListener() {
         return new TextWatcher() {
             @Override
@@ -126,29 +128,27 @@ public class AddBudgetFragment extends Fragment {
         };
     }
 
-    private void showDatePickerDialog(final EditText editText) {
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+    private void setupNumberPickers() {
+        // Month NumberPicker
+        String[] months = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+        monthPicker.setMinValue(1);
+        monthPicker.setMaxValue(12);
+        monthPicker.setDisplayedValues(months); // Display month names
+        monthPicker.setValue(Calendar.getInstance().get(Calendar.MONTH) + 1); // Set current month
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                (view, year1, monthOfYear, dayOfMonth) -> {
-                    calendar.set(Calendar.YEAR, year1);
-                    calendar.set(Calendar.MONTH, monthOfYear);
-                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    editText.setText(sdf.format(calendar.getTime()));
-                }, year, month, day);
-        datePickerDialog.show();
+
+        // Year NumberPicker
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        yearPicker.setMinValue(currentYear - 10); // Go back 10 years
+        yearPicker.setMaxValue(currentYear + 10); // Go forward 10 years
+        yearPicker.setValue(currentYear);        // Set current year
     }
+
 
     private void saveBudget() {
         String amountStr = edtAmount.getText().toString().trim();
-        String startDateStr = edtStartDate.getText().toString().trim();
-        String endDateStr = edtEndDate.getText().toString().trim();
 
-        if (spnCategory.getSelectedItem() == null || amountStr.isEmpty() || startDateStr.isEmpty() || endDateStr.isEmpty()) {
+        if (spnCategory.getSelectedItem() == null || amountStr.isEmpty()) {
             Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -174,25 +174,24 @@ public class AddBudgetFragment extends Fragment {
 
         int categoryId = categoriesList.get(spnCategory.getSelectedItemPosition()).getCategoryID();
 
-        try {
-            Date startDate = dateFormat.parse(startDateStr);
-            Date endDate = dateFormat.parse(endDateStr);
+        // Get selected month and year from NumberPickers
+        int month = monthPicker.getValue();
+        int year = yearPicker.getValue();
 
-            com.project.cem.model.User user = com.project.cem.utils.UserPreferences.getUser(getContext());
-            if (user == null) {
-                Toast.makeText(getContext(), "User is null. Cannot save budget.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            int userID = user.getUserID();
 
-            Budget newBudget = new Budget(0, userID, categoryId, amount, startDate, endDate);
-            budgetViewModel.insert(newBudget);
-            requireActivity().getSupportFragmentManager().popBackStack();
-
-        } catch (ParseException e) {
-            Toast.makeText(getContext(), "Invalid date format", Toast.LENGTH_SHORT).show();
+        com.project.cem.model.User user = com.project.cem.utils.UserPreferences.getUser(getContext());
+        if (user == null) {
+            Toast.makeText(getContext(), "User is null. Cannot save budget.", Toast.LENGTH_SHORT).show();
+            return;
         }
+        int userID = user.getUserID();
+
+        // Create Budget object with month and year
+        Budget newBudget = new Budget(0, userID, categoryId, amount, month, year); // Use new constructor
+        budgetViewModel.insert(newBudget);
+        requireActivity().getSupportFragmentManager().popBackStack();
     }
+
 
     private List<String> getCategoryNames(List<ExpenseCategory> categories) {
         List<String> names = new ArrayList<>();
@@ -205,7 +204,6 @@ public class AddBudgetFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d("AddBudgetFragment", "onDestroyView called - clearing error");
         budgetViewModel.clearErrorMessage();
     }
 }

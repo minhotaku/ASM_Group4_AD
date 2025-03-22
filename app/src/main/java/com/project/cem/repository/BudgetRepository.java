@@ -14,6 +14,7 @@ import com.project.cem.utils.UserPreferences;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +23,7 @@ public class BudgetRepository {
 
     private final SQLiteHelper dbHelper;
     private final Context context;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    // No longer needed: private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     public BudgetRepository(Context context) {
         this.context = context;
@@ -37,17 +38,18 @@ public class BudgetRepository {
         return dbHelper.getReadableDatabase();
     }
 
-    public boolean insert(SQLiteDatabase db, Budget budget) { // Returns boolean
+    public boolean insert(SQLiteDatabase db, Budget budget) {
         ContentValues values = new ContentValues();
         values.put("categoryID", budget.getCategoryID());
         values.put("amount", budget.getAmount());
-        values.put("startDate", dateFormat.format(budget.getStartDate()));
-        values.put("endDate", dateFormat.format(budget.getEndDate()));
+        values.put("month", budget.getMonth()); // Use month
+        values.put("year", budget.getYear());   // Use year
         values.put("userID", budget.getUserID());
 
         long newRowId = db.insert(SQLiteHelper.TABLE_BUDGET, null, values);
-        return newRowId != -1; // true if successful, false otherwise
+        return newRowId != -1;
     }
+
     public List<Budget> getAllBudgets(SQLiteDatabase db) {
         List<Budget> budgetList = new ArrayList<>();
         com.project.cem.model.User user = UserPreferences.getUser(context);
@@ -55,56 +57,52 @@ public class BudgetRepository {
             return budgetList;
         }
         int userId = user.getUserID();
-        String query = "SELECT B.budgetID, B.categoryID, B.amount, B.startDate, B.endDate, EC.categoryName " +
+
+        // Modified query to select month and year
+        String query = "SELECT B.budgetID, B.categoryID, B.amount, B.month, B.year, EC.categoryName " +
                 "FROM " + SQLiteHelper.TABLE_BUDGET + " B " +
                 "INNER JOIN " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " EC ON B.categoryID = EC.categoryID " +
                 "WHERE B.userID = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                try {
-                    int budgetId = cursor.getInt(cursor.getColumnIndexOrThrow("budgetID"));
-                    int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
-                    double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
-                    String startDateStr = cursor.getString(cursor.getColumnIndexOrThrow("startDate"));
-                    String endDateStr = cursor.getString(cursor.getColumnIndexOrThrow("endDate"));
-                    String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("categoryName")); // Corrected line
-                    Date startDate = dateFormat.parse(startDateStr);
-                    Date endDate = dateFormat.parse(endDateStr);
-                    Budget budget = new Budget(budgetId, userId, categoryId, amount, startDate, endDate);
-                    budgetList.add(budget);
-                } catch (ParseException e) {
-                    Log.e("BudgetRepository", "Error parsing date", e);
-                }
+                int budgetId = cursor.getInt(cursor.getColumnIndexOrThrow("budgetID"));
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
+                int month = cursor.getInt(cursor.getColumnIndexOrThrow("month")); // Get month
+                int year = cursor.getInt(cursor.getColumnIndexOrThrow("year"));   // Get year
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("categoryName"));
+
+                Budget budget = new Budget(budgetId, userId, categoryId, amount, month, year);
+                budgetList.add(budget);
             } while (cursor.moveToNext());
-            cursor.close(); // Close cursor
+            cursor.close();
         }
         return budgetList;
     }
-
 
     public int update(SQLiteDatabase db, Budget budget) {
         ContentValues values = new ContentValues();
         values.put("categoryID", budget.getCategoryID());
         values.put("amount", budget.getAmount());
-        values.put("startDate", dateFormat.format(budget.getStartDate()));
-        values.put("endDate", dateFormat.format(budget.getEndDate()));
+        values.put("month", budget.getMonth()); // Use month
+        values.put("year", budget.getYear());   // Use year
         values.put("userID", budget.getUserID());
 
         String selection = "budgetID = ?";
         String[] selectionArgs = {String.valueOf(budget.getBudgetID())};
 
         return db.update(SQLiteHelper.TABLE_BUDGET, values, selection, selectionArgs);
-
     }
 
     public List<ExpenseCategory> getAllCategories(SQLiteDatabase db) {
         List<ExpenseCategory> categories = new ArrayList<>();
         com.project.cem.model.User user = UserPreferences.getUser(context);
-        if(user == null){
-            return  categories;
+        if (user == null) {
+            return categories;
         }
-        String query = "SELECT categoryID, categoryName, userID FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY+ " WHERE userID = ?";
+        String query = "SELECT categoryID, categoryName, userID FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " WHERE userID = ?";
 
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(user.getUserID())});
 
@@ -113,28 +111,46 @@ public class BudgetRepository {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("categoryName"));
                 int userId = cursor.getInt(cursor.getColumnIndexOrThrow("userID"));
-                categories.add(new ExpenseCategory(id, userId, name)); // Sửa constructor
+                categories.add(new ExpenseCategory(id, userId, name));
             } while (cursor.moveToNext());
-            cursor.close(); // Close cursor
+            cursor.close();
         }
 
         return categories;
     }
 
-    public double getTotalExpensesForCategory(SQLiteDatabase db, int userId, int categoryId, Date startDate, Date endDate) {
+    // Modified getTotalExpensesForCategory to take month and year
+    public double getTotalExpensesForCategory(SQLiteDatabase db, int userId, int categoryId, int month, int year) {
         double totalExpenses = 0;
+
+        // Create a Calendar object for the given month and year
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear(); // Clear all fields, including time fields
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month - 1); // Month is 0-indexed (January = 0)
+        calendar.set(Calendar.DAY_OF_MONTH, 1); // Set to the first day of the month
+        Date startDate = calendar.getTime();
+
+        // Set the Calendar to the *end* of the month
+        calendar.add(Calendar.MONTH, 1);  // Go to the *beginning* of the *next* month
+        calendar.add(Calendar.DAY_OF_MONTH, -1); // Subtract one day to get the *last* day of the *current* month
+        Date endDate = calendar.getTime();
+
+        // Convert Dates to strings for the query (using a SimpleDateFormat)
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String startDateString = dateFormat.format(startDate);
+        String endDateString = dateFormat.format(endDate);
+
+        // SQLite query to get the sum of expenses for the specified category, user, month, and year
         String query = "SELECT SUM(E.amount) " +
                 "FROM " + SQLiteHelper.TABLE_EXPENSE + " E " +
                 "WHERE E.userID = ? AND E.categoryID = ? AND E.date >= ? AND E.date <= ?";
 
-        String startDateString = dateFormat.format(startDate);
-        String endDateString = dateFormat.format(endDate);
-
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId), String.valueOf(categoryId), startDateString, endDateString});
 
         if (cursor != null && cursor.moveToFirst()) {
-            totalExpenses = cursor.getDouble(0);
-            cursor.close(); // Close cursor
+            totalExpenses = cursor.getDouble(0); // The sum is in the first column (index 0)
+            cursor.close();
         }
 
         return totalExpenses;
@@ -147,22 +163,15 @@ public class BudgetRepository {
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId), String.valueOf(categoryId)});
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                try {
-                    int budgetId = cursor.getInt(cursor.getColumnIndexOrThrow("budgetID"));
-                    int returnCategoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
-                    double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
-                    String startDateStr = cursor.getString(cursor.getColumnIndexOrThrow("startDate"));
-                    String endDateStr = cursor.getString(cursor.getColumnIndexOrThrow("endDate"));
+                int budgetId = cursor.getInt(cursor.getColumnIndexOrThrow("budgetID"));
+                int returnCategoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
+                int month = cursor.getInt(cursor.getColumnIndexOrThrow("month")); // Get month
+                int year = cursor.getInt(cursor.getColumnIndexOrThrow("year"));   // Get year
 
-                    Date startDate = dateFormat.parse(startDateStr);
-                    Date endDate = dateFormat.parse(endDateStr);
+                Budget budget = new Budget(budgetId, userId, returnCategoryId, amount, month, year);
+                budgetList.add(budget);
 
-                    Budget budget = new Budget(budgetId, userId, returnCategoryId, amount, startDate, endDate);
-                    budgetList.add(budget);
-                }
-                catch (ParseException e) {
-                    Log.e("BudgetRepository", "Error parsing date", e);
-                }
             } while (cursor.moveToNext());
             cursor.close();
 

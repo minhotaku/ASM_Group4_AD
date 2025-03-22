@@ -42,32 +42,18 @@
         android:layout_marginBottom="8dp"
         android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/add_edt_start_date"
+        <NumberPicker
+            android:id="@+id/add_np_month"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:autofillHints="date"
-            android:clickable="true"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:hint="Start Date"
-            android:inputType="date"
-            android:minHeight="48dp" />
+            android:layout_weight="1" />
 
-        <EditText
-            android:id="@+id/add_edt_end_date"
+        <NumberPicker
+            android:id="@+id/add_np_year"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:autofillHints="date"
-            android:clickable="true"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:hint="End Date"
-            android:inputType="date"
-            android:minHeight="48dp" />
+            android:layout_weight="1" />
     </LinearLayout>
 
     <Button

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -40,14 +41,13 @@ public class EditBudgetFragment extends Fragment {
     private BudgetViewModel budgetViewModel;
     private Spinner spnCategory;
     private EditText edtAmount;
-    private EditText edtStartDate;
-    private EditText edtEndDate;
+    private NumberPicker monthPicker; // Use NumberPicker
+    private NumberPicker yearPicker;  // Use NumberPicker
     private Button btnUpdate;
     private Button btnCancel;
     private int budgetId;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
-    private final DecimalFormat decimalFormat = new DecimalFormat("#,###");
+    private final DecimalFormat decimalFormat = new DecimalFormat("#,###"); // Format for display
     private String current = "";
 
     public static EditBudgetFragment newInstance(int budgetId) {
@@ -73,10 +73,15 @@ public class EditBudgetFragment extends Fragment {
 
         spnCategory = view.findViewById(R.id.edit_spn_category);
         edtAmount = view.findViewById(R.id.edit_edt_amount);
-        edtStartDate = view.findViewById(R.id.edit_edt_start_date);
-        edtEndDate = view.findViewById(R.id.edit_edt_end_date);
+        // Initialize NumberPickers
+        monthPicker = view.findViewById(R.id.edit_np_month);
+        yearPicker = view.findViewById(R.id.edit_np_year);
         btnUpdate = view.findViewById(R.id.edit_btn_update);
         btnCancel = view.findViewById(R.id.edit_btn_cancel);
+
+        // Set up NumberPickers
+        setupNumberPickers();
+
 
         budgetViewModel = new ViewModelProvider(requireActivity()).get(BudgetViewModel.class);
 
@@ -91,8 +96,6 @@ public class EditBudgetFragment extends Fragment {
             loadBudgetInfo();
         });
 
-        edtStartDate.setOnClickListener(v -> showDatePickerDialog(edtStartDate));
-        edtEndDate.setOnClickListener(v -> showDatePickerDialog(edtEndDate));
 
         btnUpdate.setOnClickListener(v -> updateBudget());
         edtAmount.addTextChangedListener(onTextChangedListener());
@@ -107,7 +110,6 @@ public class EditBudgetFragment extends Fragment {
 
         return view;
     }
-
     private TextWatcher onTextChangedListener() {
         return new TextWatcher() {
             @Override
@@ -143,14 +145,30 @@ public class EditBudgetFragment extends Fragment {
             }
         };
     }
+    private void setupNumberPickers() {
+        // Month NumberPicker
+        String[] months = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+        monthPicker.setMinValue(1);
+        monthPicker.setMaxValue(12);
+        monthPicker.setDisplayedValues(months); // Display month names
+
+
+        // Year NumberPicker
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        yearPicker.setMinValue(currentYear - 10); // Go back 10 years
+        yearPicker.setMaxValue(currentYear + 10); // Go forward 10 years
+
+    }
+
 
     private void loadBudgetInfo() {
         Budget budget = budgetViewModel.getAllBudgets().getValue().stream().filter(x -> x.getBudgetID() == budgetId).findFirst().orElse(null);
 
         if (budget != null) {
             edtAmount.setText(decimalFormat.format(budget.getAmount()));
-            edtStartDate.setText(dateFormat.format(budget.getStartDate()));
-            edtEndDate.setText(dateFormat.format(budget.getEndDate()));
+            // Set month and year on NumberPickers
+            monthPicker.setValue(budget.getMonth());
+            yearPicker.setValue(budget.getYear());
 
             for (int i = 0; i < categoriesList.size(); i++) {
                 if (categoriesList.get(i).getCategoryID() == budget.getCategoryID()) {
@@ -165,14 +183,11 @@ public class EditBudgetFragment extends Fragment {
 
     private void updateBudget() {
         String amountStr = edtAmount.getText().toString().trim();
-        String startDateStr = edtStartDate.getText().toString().trim();
-        String endDateStr = edtEndDate.getText().toString().trim();
 
-        if (spnCategory.getSelectedItem() == null || amountStr.isEmpty() || startDateStr.isEmpty() || endDateStr.isEmpty()) {
+        if (spnCategory.getSelectedItem() == null || amountStr.isEmpty()) {
             Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
-
         String cleanString = amountStr.replaceAll("[$,.]", "");
         double amount;
         try {
@@ -189,42 +204,23 @@ public class EditBudgetFragment extends Fragment {
 
         int categoryId = categoriesList.get(spnCategory.getSelectedItemPosition()).getCategoryID();
 
-        try {
-            Date startDate = dateFormat.parse(startDateStr);
-            Date endDate = dateFormat.parse(endDateStr);
+        // Get month and year from NumberPickers
+        int month = monthPicker.getValue();
+        int year = yearPicker.getValue();
 
-            com.project.cem.model.User user = com.project.cem.utils.UserPreferences.getUser(getContext());
-            if (user == null) {
-                Toast.makeText(getContext(), "User is null. Cannot update budget.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            int userID = user.getUserID();
 
-            Budget updatedBudget = new Budget(budgetId, userID, categoryId, amount, startDate, endDate);
-            budgetViewModel.update(updatedBudget);
-            requireActivity().getSupportFragmentManager().popBackStack();
-
-        } catch (ParseException e) {
-            Toast.makeText(getContext(), "Invalid date format", Toast.LENGTH_SHORT).show();
+        com.project.cem.model.User user = com.project.cem.utils.UserPreferences.getUser(getContext());
+        if (user == null) {
+            Toast.makeText(getContext(), "User is null. Cannot update budget.", Toast.LENGTH_SHORT).show();
+            return;
         }
+        int userID = user.getUserID();
+
+        Budget updatedBudget = new Budget(budgetId, userID, categoryId, amount, month, year); // Use new constructor
+        budgetViewModel.update(updatedBudget);
+        requireActivity().getSupportFragmentManager().popBackStack();
     }
 
-    private void showDatePickerDialog(final EditText editText) {
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                (view, year1, monthOfYear, dayOfMonth) -> {
-                    calendar.set(Calendar.YEAR, year1);
-                    calendar.set(Calendar.MONTH, monthOfYear);
-                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    editText.setText(sdf.format(calendar.getTime()));
-                }, year, month, day);
-        datePickerDialog.show();
-    }
 
     private void showCancelConfirmationDialog() {
         new AlertDialog.Builder(getContext())
@@ -242,10 +238,10 @@ public class EditBudgetFragment extends Fragment {
         }
         return names;
     }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d("AddBudgetFragment", "onDestroyView called - clearing error");
         budgetViewModel.clearErrorMessage();
     }
 }
