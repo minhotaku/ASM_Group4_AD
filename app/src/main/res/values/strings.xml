@@ -2,14 +2,4 @@
     <string name="app_name">My Application</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string-array name="expense_categories">
-        <item>All</item>
-        <item>Transportation</item>
-        <item>Entertainment</item>
-        <item>Housing</item>
-        <item>Utilities</item>
-        <item>Health</item>
-        <item>Education</item>
-    </string-array>
-
 </resources>
