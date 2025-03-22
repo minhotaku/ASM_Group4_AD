@@ -54,24 +54,24 @@ public class SampleDataInitializer {
                             "(4, 5, 'University tuition', 1500.00, '2025-02-25'), " +
                             "(5, 6, 'Medical checkup', 120.00, '2025-03-10')");
 
-                    // 4. Dữ liệu mẫu cho bảng Budget
+                    // 4. Dữ liệu mẫu cho bảng Budget (with year and month)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_BUDGET +
-                            " (userID, categoryID, amount, startDate, endDate) VALUES " +
-                            "(1, 1, 200.00, '2025-03-01', '2025-03-31'), " +
-                            "(1, 2, 100.00, '2025-03-01', '2025-03-31'), " +
-                            "(2, 3, 150.00, '2025-03-01', '2025-03-31'), " +
-                            "(3, 4, 1000.00, '2025-03-01', '2025-03-31'), " +
-                            "(4, 5, 2000.00, '2025-03-01', '2025-03-31'), " +
-                            "(5, 6, 500.00, '2025-03-01', '2025-03-31')");
+                            " (userID, categoryID, amount, year, month) VALUES " +
+                            "(1, 1, 200.00, 2025, 3), " +
+                            "(1, 2, 100.00, 2025, 3), " +
+                            "(2, 3, 150.00, 2025, 3), " +
+                            "(3, 4, 1000.00, 2025, 3), " +
+                            "(4, 5, 2000.00, 2025, 3), " +
+                            "(5, 6, 500.00, 2025, 3)");
 
-                    // 5. Dữ liệu mẫu cho bảng RecurringExpense
+                    // 5. Dữ liệu mẫu cho bảng RecurringExpense (adjusted according to schema)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
-                            " (userID, categoryID, description, startDate, endDate, recurrenceFrequency) VALUES " +
-                            "(1, 5, 'Electricity bill', '2025-03-01', '2025-12-31', 'Monthly'), " +
-                            "(2, 4, 'Monthly rent', '2025-03-01', '2025-12-31', 'Monthly'), " +
-                            "(3, 2, 'Weekly bus pass', '2025-03-01', '2025-06-30', 'Weekly'), " +
-                            "(4, 5, 'Quarterly education fee', '2025-03-01', '2025-12-31', 'Quarterly'), " +
-                            "(5, 6, 'Health insurance', '2025-03-01', '2025-12-31', 'Annually')");
+                            " (userID, categoryID, description, year, month) VALUES " +
+                            "(1, 5, 'Electricity bill', 2025, 3), " +
+                            "(2, 4, 'Monthly rent', 2025, 3), " +
+                            "(3, 2, 'Weekly bus pass', 2025, 3), " +
+                            "(4, 5, 'Quarterly education fee', 2025, 3), " +
+                            "(5, 6, 'Health insurance', 2025, 3)");
 
                     // 6. Dữ liệu mẫu cho bảng ExpenseReport
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_REPORT +

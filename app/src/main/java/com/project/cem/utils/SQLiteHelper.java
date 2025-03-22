@@ -54,8 +54,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     "userID INTEGER, " +
                     "categoryID INTEGER, " +
                     "amount DECIMAL(10,2), " +
-                    "startDate DATE, " +
-                    "endDate DATE, " +
+                    "year INTEGER, " +
+                    "month INTEGER, " +
                     "FOREIGN KEY (userID) REFERENCES " + TABLE_USER + "(userID) ON DELETE CASCADE, " +
                     "FOREIGN KEY (categoryID) REFERENCES " + TABLE_EXPENSE_CATEGORY + "(categoryID) ON DELETE CASCADE" +
                     ")";
@@ -66,9 +66,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     "userID INTEGER, " +
                     "categoryID INTEGER, " +
                     "description TEXT, " +
-                    "startDate DATE, " +
-                    "endDate DATE, " +
-                    "recurrenceFrequency VARCHAR(50), " +
+                    "year INTEGER, " +
+                    "month INTEGER, " +
                     "FOREIGN KEY (userID) REFERENCES " + TABLE_USER + "(userID) ON DELETE CASCADE, " +
                     "FOREIGN KEY (categoryID) REFERENCES " + TABLE_EXPENSE_CATEGORY + "(categoryID) ON DELETE CASCADE" +
                     ")";

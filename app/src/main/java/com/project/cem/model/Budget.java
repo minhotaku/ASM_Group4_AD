@@ -7,63 +7,67 @@ public class Budget {
     private int userID;
     private int categoryID;
     private double amount;
-    private Date startDate;
-    private Date endDate;
+    private int year;
+    private int month;
 
     public Budget() {
     }
 
-    public Budget(int budgetID, int userID, int categoryID, double amount, Date startDate, Date endDate) {
+    public Budget(int budgetID, int userID, int categoryID, double amount, int year, int month) {
+
         this.budgetID = budgetID;
         this.userID = userID;
         this.categoryID = categoryID;
         this.amount = amount;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.year = year;
+        this.month = month;
     }
-
-    // Getters and setters
 
     public int getBudgetID() {
         return budgetID;
     }
+
+    public void setBudgetID(int budgetID) {
+        this.budgetID = budgetID;
+    }
+
     public int getUserID() {
         return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
     public int getCategoryID() {
         return categoryID;
     }
 
-    public double getAmount() {
-        return amount;
-    }
-
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-    public void setBudgetID(int budgetID) {
-        this.budgetID = budgetID;
-    }
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
     public void setCategoryID(int categoryID) {
         this.categoryID = categoryID;
+    }
+
+    public double getAmount() {
+        return amount;
     }
 
     public void setAmount(double amount) {
         this.amount = amount;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public int getYear() {
+        return year;
     }
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
     }
 }

@@ -5,23 +5,18 @@ public class RecurringExpense {
     private int userID;
     private int categoryID;
     private String description;
-    private Date startDate;
-    private Date endDate;
-    private String recurrenceFrequency;
+    private int year;
+    private int month;
 
     public RecurringExpense() {
     }
 
-    public RecurringExpense(int recurringExpenseID, int userID, int categoryID,
-                            String description, Date startDate, Date endDate,
-                            String recurrenceFrequency) {
+    public RecurringExpense(int recurringExpenseID, int userID, int categoryID, String description, int year, int month) {
         this.recurringExpenseID = recurringExpenseID;
         this.userID = userID;
         this.categoryID = categoryID;
         this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.recurrenceFrequency = recurrenceFrequency;
+        this.year = year;
     }
 
     public int getRecurringExpenseID() {
@@ -56,27 +51,19 @@ public class RecurringExpense {
         this.description = description;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public int getYear() {
+        return year;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setYear(int year) {
+        this.year = year;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public int getMonth() {
+        return month;
     }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getRecurrenceFrequency() {
-        return recurrenceFrequency;
-    }
-
-    public void setRecurrenceFrequency(String recurrenceFrequency) {
-        this.recurrenceFrequency = recurrenceFrequency;
+    public void setMonth(int month) {
+        this.month = month;
     }
 }
