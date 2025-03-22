@@ -1,16 +1,12 @@
 package com.project.cem.ui.budget;
 
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,25 +22,23 @@ import com.project.cem.viewmodel.BudgetViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class BudgetFragment extends Fragment {
 
     private BudgetViewModel budgetViewModel;
-    private Button btnAddBudget;
     private ProgressBar progressBar;
+    private ImageView btnAddBudget;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
         progressBar = view.findViewById(R.id.progress_bar);
-        btnAddBudget = view.findViewById(R.id.btn_add_budget);
+        btnAddBudget = view.findViewById(R.id.img_add_budget);
         RecyclerView rclViewBudgets = view.findViewById(R.id.rcl_view_budgets);
 
         rclViewBudgets.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -57,7 +51,6 @@ public class BudgetFragment extends Fragment {
             categoriesList.clear();
             categoriesList.addAll(categories);
             budgetsAdapter.setCategories(categoriesList);
-
         });
 
         budgetViewModel.getAllBudgets().observe(getViewLifecycleOwner(), budgets -> {
@@ -75,20 +68,18 @@ public class BudgetFragment extends Fragment {
         budgetViewModel.getMessageLiveData().observe(getViewLifecycleOwner(), message -> {
             if (message != null && !message.isEmpty()) {
                 Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                budgetViewModel.clearMessage(); // Clear after displaying
             }
         });
 
         budgetViewModel.isLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading) {
-                progressBar.setVisibility(View.VISIBLE);
-            } else {
-                progressBar.setVisibility(View.GONE);
-            }
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
 
         budgetViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                budgetViewModel.clearErrorMessage(); // Clear after displaying
             }
         });
 

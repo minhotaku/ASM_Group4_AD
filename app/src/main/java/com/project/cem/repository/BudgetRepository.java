@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
 import com.project.cem.model.Budget;
 import com.project.cem.model.ExpenseCategory;
 import com.project.cem.utils.SQLiteHelper;
@@ -22,15 +20,15 @@ import java.util.Locale;
 
 public class BudgetRepository {
 
-    private SQLiteHelper dbHelper;
-    private Context context;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private final SQLiteHelper dbHelper;
+    private final Context context;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     public BudgetRepository(Context context) {
         this.context = context;
         this.dbHelper = new SQLiteHelper(context);
     }
-    //lấy db instance
+
     public SQLiteDatabase getWritableDatabase() {
         return dbHelper.getWritableDatabase();
     }
@@ -39,9 +37,7 @@ public class BudgetRepository {
         return dbHelper.getReadableDatabase();
     }
 
-    public long insert(SQLiteDatabase db, Budget budget) { // Thêm SQLiteDatabase db
-        // Không mở và đóng db ở đây nữa
-        // SQLiteDatabase db = dbHelper.getWritableDatabase();
+    public boolean insert(SQLiteDatabase db, Budget budget) { // Returns boolean
         ContentValues values = new ContentValues();
         values.put("categoryID", budget.getCategoryID());
         values.put("amount", budget.getAmount());
@@ -50,13 +46,12 @@ public class BudgetRepository {
         values.put("userID", budget.getUserID());
 
         long newRowId = db.insert(SQLiteHelper.TABLE_BUDGET, null, values);
-        // db.close(); // Không đóng ở đây
-        return newRowId;
+        return newRowId != -1; // true if successful, false otherwise
     }
-
     public List<Budget> getAllBudgets(SQLiteDatabase db) {
         List<Budget> budgetList = new ArrayList<>();
-        com.project.cem.model.User user = UserPreferences.getUser(context); if (user == null) {
+        com.project.cem.model.User user = UserPreferences.getUser(context);
+        if (user == null) {
             return budgetList;
         }
         int userId = user.getUserID();
@@ -73,20 +68,20 @@ public class BudgetRepository {
                     double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
                     String startDateStr = cursor.getString(cursor.getColumnIndexOrThrow("startDate"));
                     String endDateStr = cursor.getString(cursor.getColumnIndexOrThrow("endDate"));
-                    String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("categoryName"));
+                    String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("categoryName")); // Corrected line
                     Date startDate = dateFormat.parse(startDateStr);
                     Date endDate = dateFormat.parse(endDateStr);
-
-                    Budget budget = new Budget(budgetId, userId, categoryId, amount, startDate, endDate); // SỬA CONSTRUCTOR
+                    Budget budget = new Budget(budgetId, userId, categoryId, amount, startDate, endDate);
                     budgetList.add(budget);
                 } catch (ParseException e) {
                     Log.e("BudgetRepository", "Error parsing date", e);
                 }
             } while (cursor.moveToNext());
-            cursor.close();
+            cursor.close(); // Close cursor
         }
         return budgetList;
     }
+
 
     public int update(SQLiteDatabase db, Budget budget) {
         ContentValues values = new ContentValues();
@@ -99,8 +94,8 @@ public class BudgetRepository {
         String selection = "budgetID = ?";
         String[] selectionArgs = {String.valueOf(budget.getBudgetID())};
 
-        int count = db.update(SQLiteHelper.TABLE_BUDGET, values, selection, selectionArgs);
-        return count;
+        return db.update(SQLiteHelper.TABLE_BUDGET, values, selection, selectionArgs);
+
     }
 
     public List<ExpenseCategory> getAllCategories(SQLiteDatabase db) {
@@ -120,15 +115,14 @@ public class BudgetRepository {
                 int userId = cursor.getInt(cursor.getColumnIndexOrThrow("userID"));
                 categories.add(new ExpenseCategory(id, userId, name)); // Sửa constructor
             } while (cursor.moveToNext());
-            cursor.close();
+            cursor.close(); // Close cursor
         }
 
         return categories;
     }
+
     public double getTotalExpensesForCategory(SQLiteDatabase db, int userId, int categoryId, Date startDate, Date endDate) {
-
         double totalExpenses = 0;
-
         String query = "SELECT SUM(E.amount) " +
                 "FROM " + SQLiteHelper.TABLE_EXPENSE + " E " +
                 "WHERE E.userID = ? AND E.categoryID = ? AND E.date >= ? AND E.date <= ?";
@@ -140,7 +134,7 @@ public class BudgetRepository {
 
         if (cursor != null && cursor.moveToFirst()) {
             totalExpenses = cursor.getDouble(0);
-            cursor.close();
+            cursor.close(); // Close cursor
         }
 
         return totalExpenses;
@@ -176,6 +170,5 @@ public class BudgetRepository {
 
         return budgetList;
     }
-
 
 }
