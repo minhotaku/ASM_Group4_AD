@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -34,8 +35,8 @@ import java.util.Locale;
 public class BudgetFragment extends Fragment {
 
     private BudgetViewModel budgetViewModel;
-    private Button btnAddBudget;
     private ProgressBar progressBar;
+    private ImageView btnAddBudget;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
@@ -44,7 +45,7 @@ public class BudgetFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
         progressBar = view.findViewById(R.id.progress_bar);
-        btnAddBudget = view.findViewById(R.id.btn_add_budget);
+        btnAddBudget = view.findViewById(R.id.img_add_budget);
         RecyclerView rclViewBudgets = view.findViewById(R.id.rcl_view_budgets);
 
         rclViewBudgets.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -100,6 +101,7 @@ public class BudgetFragment extends Fragment {
         super.onResume();
         budgetViewModel.checkBudgets();
     }
+
     private List<String> getCategoryNames(List<ExpenseCategory> categories) {
         List<String> names = new ArrayList<>();
         for (ExpenseCategory category : categories) {

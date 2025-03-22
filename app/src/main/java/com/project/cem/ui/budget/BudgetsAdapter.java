@@ -1,22 +1,26 @@
 package com.project.cem.ui.budget;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat; // Import for ContextCompat
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.cem.R;
 import com.project.cem.model.Budget;
 import com.project.cem.model.ExpenseCategory;
+import com.project.cem.repository.BudgetRepository;
 import com.project.cem.viewmodel.BudgetViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,15 +28,17 @@ public class BudgetsAdapter extends RecyclerView.Adapter<BudgetsAdapter.BudgetVi
 
     private List<Budget> budgets;
     private List<ExpenseCategory> categoriesList;
-    private BudgetViewModel budgetViewModel;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-    private Context context;
+    private final BudgetViewModel budgetViewModel;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private final Context context;
+    private final BudgetRepository budgetRepository;
 
     public BudgetsAdapter(List<Budget> budgets, List<ExpenseCategory> categories, BudgetViewModel budgetViewModel, Context context) {
         this.budgets = budgets != null ? budgets : new ArrayList<>();
         this.categoriesList = categories != null ? categories : new ArrayList<>();
         this.budgetViewModel = budgetViewModel;
         this.context = context;
+        this.budgetRepository = new BudgetRepository(context);
     }
 
     @NonNull
@@ -50,9 +56,39 @@ public class BudgetsAdapter extends RecyclerView.Adapter<BudgetsAdapter.BudgetVi
         String categoryName = getCategoryName(currentBudget.getCategoryID());
         holder.tvCategoryName.setText(categoryName);
 
-        holder.tvAmount.setText(String.format(Locale.getDefault(), "%.0f VND", currentBudget.getAmount()));
-        holder.tvStartDate.setText(dateFormat.format(currentBudget.getStartDate()));
-        holder.tvEndDate.setText(dateFormat.format(currentBudget.getEndDate()));
+        // Combine start and end date into a single string
+        String dateRange = String.format(
+                "From %s to %s",
+                dateFormat.format(currentBudget.getStartDate()),
+                dateFormat.format(currentBudget.getEndDate())
+        );
+        holder.tvDateRange.setText(dateRange); // Use the combined date range
+
+        SQLiteDatabase db = budgetRepository.getReadableDatabase();
+        double totalExpenses = budgetRepository.getTotalExpensesForCategory(
+                db,
+                currentBudget.getUserID(),
+                currentBudget.getCategoryID(),
+                currentBudget.getStartDate(),
+                currentBudget.getEndDate()
+        );
+
+        double percentage = (currentBudget.getAmount() > 0) ? (totalExpenses / currentBudget.getAmount()) * 100 : 0;
+        percentage = Math.min(percentage, 100);
+
+        String progressText;
+        int textColor;
+
+        if (totalExpenses > currentBudget.getAmount()) {
+            progressText = String.format(Locale.getDefault(), "Overspent! (%.0f VND)", totalExpenses - currentBudget.getAmount());
+            textColor = ContextCompat.getColor(context, R.color.red);
+        } else {
+            progressText = String.format(Locale.getDefault(), "Spent: %.0f / %.0f VND (%.2f%%)", totalExpenses, currentBudget.getAmount(), percentage);
+            textColor = ContextCompat.getColor(context, R.color.green);
+        }
+
+        holder.tvBudgetProgress.setText(progressText);
+        holder.tvBudgetProgress.setTextColor(textColor);
 
         holder.itemView.setOnClickListener(v -> {
             if (context instanceof FragmentActivity) {
@@ -76,13 +112,18 @@ public class BudgetsAdapter extends RecyclerView.Adapter<BudgetsAdapter.BudgetVi
 
     @Override
     public int getItemCount() {
-        return budgets == null ? 0 : budgets.size(); // Sửa để tránh NullPointerException
+        return budgets == null ? 0 : budgets.size();
     }
 
     public void setBudgets(List<Budget> budgets) {
-        this.budgets = budgets;
-        notifyDataSetChanged();
+        this.budgets = new ArrayList<>(budgets); // Tạo bản sao để tránh thay đổi danh sách gốc
+
+        // Sắp xếp danh sách theo startDate mới nhất trước
+        Collections.sort(this.budgets, (b1, b2) -> b2.getStartDate().compareTo(b1.getStartDate()));
+
+        notifyDataSetChanged(); // Cập nhật RecyclerView
     }
+
 
     public void setCategories(List<ExpenseCategory> categories) {
         this.categoriesList = categories;
@@ -90,17 +131,15 @@ public class BudgetsAdapter extends RecyclerView.Adapter<BudgetsAdapter.BudgetVi
     }
 
     static class BudgetViewHolder extends RecyclerView.ViewHolder {
-        TextView tvAmount;
-        TextView tvStartDate;
-        TextView tvEndDate;
+        TextView tvDateRange; // Combined date range TextView
         TextView tvCategoryName;
+        TextView tvBudgetProgress;
 
         public BudgetViewHolder(View itemView) {
             super(itemView);
-            tvAmount = itemView.findViewById(R.id.tv_amount);
-            tvStartDate = itemView.findViewById(R.id.tv_start_date);
-            tvEndDate = itemView.findViewById(R.id.tv_end_date);
+            tvDateRange = itemView.findViewById(R.id.tv_date_range); // Use a single TextView for the date range
             tvCategoryName = itemView.findViewById(R.id.tv_category_name);
+            tvBudgetProgress = itemView.findViewById(R.id.tv_budget_progress);
         }
     }
 }

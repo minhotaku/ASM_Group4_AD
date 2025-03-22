@@ -1,6 +1,8 @@
 package com.project.cem.ui.budget;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +40,7 @@ public class EditBudgetFragment extends Fragment {
     private EditText edtStartDate;
     private EditText edtEndDate;
     private Button btnUpdate;
+    private Button btnCancel; // Add Cancel button
     private int budgetId;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
@@ -68,6 +71,7 @@ public class EditBudgetFragment extends Fragment {
         edtStartDate = view.findViewById(R.id.edit_edt_start_date);
         edtEndDate = view.findViewById(R.id.edit_edt_end_date);
         btnUpdate = view.findViewById(R.id.edit_btn_update);
+        btnCancel = view.findViewById(R.id.edit_btn_cancel); // Get reference to Cancel button
 
         budgetViewModel = new ViewModelProvider(requireActivity()).get(BudgetViewModel.class);
 
@@ -79,17 +83,20 @@ public class EditBudgetFragment extends Fragment {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spnCategory.setAdapter(adapter);
 
-            loadBudgetInfo(); // Load sau khi đã có danh sách categories
+            loadBudgetInfo();
         });
-
 
 
         edtStartDate.setOnClickListener(v -> showDatePickerDialog(edtStartDate));
         edtEndDate.setOnClickListener(v -> showDatePickerDialog(edtEndDate));
 
         btnUpdate.setOnClickListener(v -> updateBudget());
-        budgetViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage ->{
-            if(errorMessage!= null && !errorMessage.isEmpty()){
+
+        // Add OnClickListener for Cancel button
+        btnCancel.setOnClickListener(v -> showCancelConfirmationDialog());
+
+        budgetViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
+            if (errorMessage != null && !errorMessage.isEmpty()) {
                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
             }
         });
@@ -98,62 +105,40 @@ public class EditBudgetFragment extends Fragment {
     }
 
     private void loadBudgetInfo() {
-        // Lấy danh sách budgets từ LiveData
-        List<Budget> budgets = budgetViewModel.getAllBudgets().getValue();
+        // Lấy budget từ danh sách budgets trong ViewModel (dựa vào budgetId)
+        // Dùng Java Stream API để tìm budget có budgetId khớp
+        Budget budget = budgetViewModel.getAllBudgets().getValue().stream().filter(x -> x.getBudgetID() == budgetId).findFirst().orElse(null);
 
-        if (budgets != null) {
-            // Tìm budget có budgetId tương ứng
-            Budget budget = null;
-            for (Budget b : budgets) {
-                if (b.getBudgetID() == budgetId) {
-                    budget = b;
+        if (budget != null) {
+            // Hiển thị thông tin budget lên các EditText
+            edtAmount.setText(String.valueOf(budget.getAmount()));
+            edtStartDate.setText(dateFormat.format(budget.getStartDate()));
+            edtEndDate.setText(dateFormat.format(budget.getEndDate()));
+
+            // Chọn category tương ứng trong Spinner
+            for (int i = 0; i < categoriesList.size(); i++) {
+                if (categoriesList.get(i).getCategoryID() == budget.getCategoryID()) {
+                    spnCategory.setSelection(i);
                     break;
                 }
             }
-            if (budget != null) {
-                edtAmount.setText(String.valueOf(budget.getAmount()));
-                edtStartDate.setText(dateFormat.format(budget.getStartDate()));
-                edtEndDate.setText(dateFormat.format(budget.getEndDate()));
-
-                for (int i = 0; i < categoriesList.size(); i++) {
-                    if (categoriesList.get(i).getCategoryID() == budget.getCategoryID()) {
-                        spnCategory.setSelection(i);
-                        break;
-                    }
-                }
-            } else {
-                Log.d("DEBUG", "loadBudgetInfo: Budget not found for budgetId: " + budgetId);
-            }
-
         } else {
-            Log.d("DEBUG", "loadBudgetInfo: null"); // Log nếu budget list là null.
+            Log.d("DEBUG", "loadBudgetInfo: null"); // Log nếu không tìm thấy budget
         }
-
     }
 
-
     private void updateBudget() {
-
-        // Log để debug
-        Log.d("EditBudgetFragment", "categoriesList: " + categoriesList);
-        Log.d("EditBudgetFragment", "spnCategory: " + spnCategory);
-
+        // Lấy và kiểm tra dữ liệu đầu vào
         String amountStr = edtAmount.getText().toString().trim();
         String startDateStr = edtStartDate.getText().toString().trim();
         String endDateStr = edtEndDate.getText().toString().trim();
 
-
         if (spnCategory.getSelectedItem() == null || amountStr.isEmpty() || startDateStr.isEmpty() || endDateStr.isEmpty()) {
             Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            Log.d("EditBudgetFragment", "spnCategory.getSelectedItem(): " + spnCategory.getSelectedItem());
             return;
         }
-        //Kiểm tra null
-        if (categoriesList == null || categoriesList.isEmpty() || spnCategory.getSelectedItemPosition() < 0 || spnCategory.getSelectedItemPosition() >= categoriesList.size()) {
-            Log.e("EditBudgetFragment", "categoriesList is null or empty, or invalid position");
-            Toast.makeText(getContext(), "No categories available.", Toast.LENGTH_SHORT).show();
-            return;
-        }
+
+        // Lấy categoryId
         int categoryId = categoriesList.get(spnCategory.getSelectedItemPosition()).getCategoryID();
         double amount = Double.parseDouble(amountStr);
 
@@ -161,8 +146,8 @@ public class EditBudgetFragment extends Fragment {
             Date startDate = dateFormat.parse(startDateStr);
             Date endDate = dateFormat.parse(endDateStr);
 
+            // Lấy User
             com.project.cem.model.User user = com.project.cem.utils.UserPreferences.getUser(getContext());
-            Log.d("EditBudgetFragment", "User: "+ user);
             if (user == null) {
                 Log.e("EditBudgetFragment", "User is null. Cannot update budget.");
                 Toast.makeText(getContext(), "User is null. Cannot update budget.", Toast.LENGTH_SHORT).show();
@@ -170,19 +155,21 @@ public class EditBudgetFragment extends Fragment {
             }
             int userID = user.getUserID();
 
+            // Tạo Budget object
             Budget updatedBudget = new Budget(budgetId, userID, categoryId, amount, startDate, endDate);
 
+            // Gọi update trên ViewModel
             budgetViewModel.update(updatedBudget);
 
+            // Pop back stack (quay lại BudgetFragment)
             requireActivity().getSupportFragmentManager().popBackStack();
 
         } catch (ParseException e) {
             Log.e("EditBudgetFragment", "Error parsing date", e);
             Toast.makeText(getContext(), "Invalid date format", Toast.LENGTH_SHORT).show();
-            return; //Thêm return
+            return; // Thoát nếu có lỗi
         }
     }
-
 
     private void showDatePickerDialog(final EditText editText) {
         final Calendar calendar = Calendar.getInstance();
@@ -200,6 +187,19 @@ public class EditBudgetFragment extends Fragment {
                 }, year, month, day);
         datePickerDialog.show();
     }
+
+    private void showCancelConfirmationDialog() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Cancel Update")
+                .setMessage("Are you sure you want to cancel the update?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Quay lại BudgetFragment
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                })
+                .setNegativeButton("No", null) // Không làm gì cả nếu chọn "No"
+                .show();
+    }
+
     private List<String> getCategoryNames(List<ExpenseCategory> categories) {
         List<String> names = new ArrayList<>();
         for (ExpenseCategory category : categories) {
@@ -207,5 +207,4 @@ public class EditBudgetFragment extends Fragment {
         }
         return names;
     }
-
 }
