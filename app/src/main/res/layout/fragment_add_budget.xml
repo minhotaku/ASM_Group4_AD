@@ -33,7 +33,7 @@
         android:layout_marginBottom="8dp"
         android:autofillHints="amount"
         android:hint="Amount"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:minHeight="48dp" />
 
     <LinearLayout

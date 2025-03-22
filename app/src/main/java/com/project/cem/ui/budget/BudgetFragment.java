@@ -1,17 +1,12 @@
 package com.project.cem.ui.budget;
 
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,8 +22,6 @@ import com.project.cem.viewmodel.BudgetViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,7 +31,7 @@ public class BudgetFragment extends Fragment {
     private ProgressBar progressBar;
     private ImageView btnAddBudget;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -58,7 +51,6 @@ public class BudgetFragment extends Fragment {
             categoriesList.clear();
             categoriesList.addAll(categories);
             budgetsAdapter.setCategories(categoriesList);
-
         });
 
         budgetViewModel.getAllBudgets().observe(getViewLifecycleOwner(), budgets -> {
@@ -76,20 +68,18 @@ public class BudgetFragment extends Fragment {
         budgetViewModel.getMessageLiveData().observe(getViewLifecycleOwner(), message -> {
             if (message != null && !message.isEmpty()) {
                 Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                budgetViewModel.clearMessage(); // Clear after displaying
             }
         });
 
         budgetViewModel.isLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading) {
-                progressBar.setVisibility(View.VISIBLE);
-            } else {
-                progressBar.setVisibility(View.GONE);
-            }
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
 
         budgetViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                budgetViewModel.clearErrorMessage(); // Clear after displaying
             }
         });
 
@@ -101,7 +91,6 @@ public class BudgetFragment extends Fragment {
         super.onResume();
         budgetViewModel.checkBudgets();
     }
-
     private List<String> getCategoryNames(List<ExpenseCategory> categories) {
         List<String> names = new ArrayList<>();
         for (ExpenseCategory category : categories) {
