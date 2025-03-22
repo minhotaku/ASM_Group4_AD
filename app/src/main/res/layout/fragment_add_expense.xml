@@ -48,9 +48,5 @@
         android:text="No date selected"/>
 
     <!-- Nút thêm -->
-    <Button
-        android:id="@+id/buttonAddExpense"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="Add Expense"/>
+
 </LinearLayout>

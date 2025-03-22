@@ -47,7 +47,7 @@ public class AddExpenseFragment extends Fragment {
         editTextAmount = root.findViewById(R.id.editTextAmount);
         textViewSelectedDate = root.findViewById(R.id.textViewSelectedDate);
         buttonSelectDate = root.findViewById(R.id.buttonSelectDate);
-        buttonAddExpense = root.findViewById(R.id.buttonAddExpense);
+
 
         // Danh sách loại chi tiêu
         String[] categories = {"Transportation", "Entertainment", "Housing", "Utilities", "Health", "Education"};
