@@ -18,6 +18,8 @@ import com.project.cem.utils.UserPreferences;
 import com.project.cem.ui.setting.ChangePasswordFragment;
 import com.project.cem.ui.setting.report.ExpenseReportFragment;
 import com.project.cem.ui.setting.recurring.RecurringExpenseFragment;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -71,10 +73,12 @@ public class SettingFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_setting, container, false);
 
-        Button btnChangePassword = view.findViewById(R.id.btnGoToChangePassword);
-        Button btnLogout = view.findViewById(R.id.btnLogout);
-        Button btnGotoRecurringExpense = view.findViewById(R.id.btnGotoRecurringExpense);
-        Button btnGotoExpenseReport = view.findViewById(R.id.btnGotoExpenseReport);
+        MaterialButton btnChangePassword = view.findViewById(R.id.btnGoToChangePassword);
+        MaterialButton btnLogout = view.findViewById(R.id.btnLogout);
+        MaterialButton btnGotoRecurringExpense = view.findViewById(R.id.btnGotoRecurringExpense);
+        MaterialButton btnGotoExpenseReport = view.findViewById(R.id.btnGotoExpenseReport);
+        MaterialCardView cardRecurringExpense = view.findViewById(R.id.cardRecurringExpense);
+        MaterialCardView cardExpenseReport = view.findViewById(R.id.cardExpenseReport);
 
         btnChangePassword.setOnClickListener(v -> {
             Fragment changePasswordFragment = new ChangePasswordFragment();
@@ -96,6 +100,20 @@ public class SettingFragment extends Fragment {
         });
 
         btnGotoExpenseReport.setOnClickListener(v -> {
+            Fragment expenseReportFragment = new ExpenseReportFragment();
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.frame_layout, expenseReportFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+        cardRecurringExpense.setOnClickListener(v -> {
+            Fragment recurringExpenseFragment = new RecurringExpenseFragment();
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.frame_layout, recurringExpenseFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+        cardExpenseReport.setOnClickListener(v -> {
             Fragment expenseReportFragment = new ExpenseReportFragment();
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
             transaction.replace(R.id.frame_layout, expenseReportFragment);
