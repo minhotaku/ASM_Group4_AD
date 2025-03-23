@@ -128,8 +128,9 @@ public class SpendingOverviewViewModel extends AndroidViewModel {
                     regularSpending.get(i).setColorCode(colorArray[i % colorArray.length]);
                 }
 
-                // Get total budget for the month
-                double budget = spendingOverviewRepository.getTotalBudgetForMonth(userId, currentMonth, currentYear);
+                // Hàm lấy tổng ngân sách hàng tháng của người dùng ( Tổng = chi tiêu cố định + ngân sách trong tháng)
+                double budget = spendingOverviewRepository.getTotalBudgetForMonth(userId, currentMonth, currentYear) +
+                        spendingOverviewRepository.getMonthlyRecurringExpense(userId, currentMonth, currentYear);
 
                 // Calculate budget percentage
                 double budgetPct = (budget > 0) ? (total / budget) * 100 : 0;

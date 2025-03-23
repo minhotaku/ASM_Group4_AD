@@ -144,4 +144,33 @@ public class SpendingOverviewRepository {
 
         return totalBudget;
     }
+
+    public double getMonthlyRecurringExpense(long userId, int month, int year) {
+        double recurringExpense = 0;
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        try {
+            // SQL query to get recurring expenses for a specific month and year where the frequency is monthly
+            String query = "SELECT SUM(amount) as recurringExpense " +
+                    "FROM " + SQLiteHelper.TABLE_RECURRING_EXPENSE + " " +
+                    "WHERE userID = ? " +
+                    "AND recurrenceFrequency = 'Month' " + // Filter by recurrence frequency being "Month"
+                    "AND ((month = ? AND year = ?) OR (recurrenceFrequency = 'Month'))";  // Include any monthly recurrence
+
+            try (Cursor cursor = db.rawQuery(query, new String[]{
+                    String.valueOf(userId),
+                    String.valueOf(month),
+                    String.valueOf(year)
+            })) {
+                if (cursor.moveToFirst()) {
+                    recurringExpense = cursor.getDouble(cursor.getColumnIndexOrThrow("recurringExpense"));
+                }
+            }
+        } finally {
+            db.close();
+        }
+
+        return recurringExpense;
+    }
+
 }
