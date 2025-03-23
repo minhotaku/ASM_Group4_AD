@@ -26,8 +26,10 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.project.cem.R;
 import com.project.cem.ui.home.CategorySpendingAdapter;
 import com.project.cem.model.CategorySpending;
+import com.project.cem.utils.VndCurrencyFormatter;
 import com.project.cem.viewmodel.SpendingOverviewViewModel;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,8 +44,12 @@ public class HomeFragment extends Fragment {
     private CategorySpendingAdapter categoryAdapter;
     private ProgressBar loadingProgressBar;
     private TextView monthYearTextView;
-    private TextView totalSpendingTextView;
+    private TextView totalSpendingTextView,totalSpendingTextView2;
+    private TextView totalBudgetTextView;
+    private TextView budgetComparisonTextView;
+    private ProgressBar budgetProgressBar;
     private LinearLayout emptyStateLayout;
+    private VndCurrencyFormatter currencyFormatter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -55,12 +61,19 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Initialize currency formatter
+        currencyFormatter = new VndCurrencyFormatter();
+
         // Initialize views
         pieChart = view.findViewById(R.id.spendingPieChart);
         categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
         loadingProgressBar = view.findViewById(R.id.loadingProgressBar);
         monthYearTextView = view.findViewById(R.id.monthYearTextView);
         totalSpendingTextView = view.findViewById(R.id.totalSpendingTextView);
+        totalSpendingTextView2 = view.findViewById(R.id.totalSpendingTextView2);
+        totalBudgetTextView = view.findViewById(R.id.totalBudgetTextView);
+        budgetComparisonTextView = view.findViewById(R.id.budgetComparisonTextView);
+        budgetProgressBar = view.findViewById(R.id.budgetProgressBar);
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
 
         // Set current month and year
@@ -69,10 +82,11 @@ public class HomeFragment extends Fragment {
                 "July", "August", "September", "October", "November", "December"};
         String currentMonth = months[calendar.get(Calendar.MONTH)];
         int currentYear = calendar.get(Calendar.YEAR);
+        // Hiển thị tháng trên giao diện người dùng
         monthYearTextView.setText(String.format("%s %d", currentMonth, currentYear));
 
         // Initialize RecyclerView
-        categoryAdapter = new CategorySpendingAdapter();
+        categoryAdapter = new CategorySpendingAdapter(currencyFormatter);
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         categoryRecyclerView.setAdapter(categoryAdapter);
 
@@ -85,6 +99,8 @@ public class HomeFragment extends Fragment {
         // Observe LiveData
         viewModel.getCategorySpendingData().observe(getViewLifecycleOwner(), this::updateChartData);
         viewModel.getTotalSpending().observe(getViewLifecycleOwner(), this::updateTotalSpending);
+        viewModel.getTotalBudget().observe(getViewLifecycleOwner(), this::updateTotalBudget);
+        viewModel.getBudgetPercentage().observe(getViewLifecycleOwner(), this::updateBudgetComparison);
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), this::showLoading);
         viewModel.getErrorMessage().observe(getViewLifecycleOwner(), this::showError);
 
@@ -101,7 +117,7 @@ public class HomeFragment extends Fragment {
         pieChart.setHoleColor(Color.WHITE);
         pieChart.setTransparentCircleRadius(61f);
         pieChart.setDrawCenterText(true);
-        pieChart.setCenterText("Spending");
+        pieChart.setCenterText("Chi tiêu");
         pieChart.animateY(1000);
 
         Legend legend = pieChart.getLegend();
@@ -124,7 +140,7 @@ public class HomeFragment extends Fragment {
             colors.add(item.getColorCode());
         }
 
-        PieDataSet dataSet = new PieDataSet(entries, "Spending Categories");
+        PieDataSet dataSet = new PieDataSet(entries, "Danh mục chi tiêu");
         dataSet.setColors(colors);
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.WHITE);
@@ -139,8 +155,41 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateTotalSpending(Double total) {
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault());
-        totalSpendingTextView.setText(currencyFormat.format(total));
+        totalSpendingTextView.setText(currencyFormatter.format(total));
+        totalSpendingTextView2.setText(currencyFormatter.format(total));
+    }
+
+    private void updateTotalBudget(Double budget) {
+        totalBudgetTextView.setText(currencyFormatter.format(budget));
+    }
+
+    private void updateBudgetComparison(Double percentage) {
+        int progress = percentage.intValue();
+        if (progress > 100) progress = 100;
+
+        budgetProgressBar.setProgress(progress);
+
+        // Set color based on percentage
+        int color;
+        if (percentage <= 50) {
+            color = Color.rgb(46, 204, 113); // Green
+        } else if (percentage <= 80) {
+            color = Color.rgb(243, 156, 18); // Orange
+        } else {
+            color = Color.rgb(231, 76, 60); // Red
+        }
+
+        budgetProgressBar.getProgressDrawable().setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
+
+        // Format the percentage
+        DecimalFormat df = new DecimalFormat("#.#");
+        budgetComparisonTextView.setText(df.format(percentage) + "%");
+
+        if (percentage > 100) {
+            budgetComparisonTextView.setTextColor(Color.rgb(231, 76, 60)); // Red if over budget
+        } else {
+            budgetComparisonTextView.setTextColor(Color.BLACK);
+        }
     }
 
     private void showLoading(Boolean isLoading) {

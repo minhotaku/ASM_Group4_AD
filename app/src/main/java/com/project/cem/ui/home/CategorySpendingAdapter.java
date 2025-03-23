@@ -12,14 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.cem.R;
 import com.project.cem.model.CategorySpending;
+import com.project.cem.utils.VndCurrencyFormatter;
 
-import java.text.NumberFormat;
 import java.util.Locale;
 
 public class CategorySpendingAdapter extends ListAdapter<CategorySpending, CategorySpendingAdapter.ViewHolder> {
+    private final VndCurrencyFormatter currencyFormatter;
 
-    public CategorySpendingAdapter() {
+    public CategorySpendingAdapter(VndCurrencyFormatter currencyFormatter) {
         super(DIFF_CALLBACK);
+        this.currencyFormatter = currencyFormatter;
     }
 
     @NonNull
@@ -33,7 +35,7 @@ public class CategorySpendingAdapter extends ListAdapter<CategorySpending, Categ
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CategorySpending item = getItem(position);
-        holder.bind(item);
+        holder.bind(item, currencyFormatter);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -50,13 +52,10 @@ public class CategorySpendingAdapter extends ListAdapter<CategorySpending, Categ
             colorIndicator = itemView.findViewById(R.id.colorIndicator);
         }
 
-        public void bind(CategorySpending item) {
+        public void bind(CategorySpending item, VndCurrencyFormatter formatter) {
             categoryNameText.setText(item.getCategoryName());
             percentageText.setText(String.format(Locale.getDefault(), "%.1f%%", item.getPercentage()));
-
-            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault());
-            amountText.setText(currencyFormat.format(item.getAmount()));
-
+            amountText.setText(formatter.format(item.getAmount()));
             colorIndicator.setBackgroundColor(item.getColorCode());
         }
     }

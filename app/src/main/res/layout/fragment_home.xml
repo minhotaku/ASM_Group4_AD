@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Spending Overview"
+            android:text="Tổng quan chi tiêu"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -25,7 +25,7 @@
             android:id="@+id/monthYearTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="March 2025"
+            android:text="Tháng 3 2025"
             android:textSize="16sp"
             android:textColor="@android:color/darker_gray"
             android:layout_marginBottom="16dp"/>
@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Total Spending:"
+            android:text="Tổng chi tiêu:"
             android:textSize="16sp"
             android:textColor="@android:color/black"/>
 
@@ -41,11 +41,11 @@
             android:id="@+id/totalSpendingTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="$0.00"
+            android:text="0 VNĐ"
             android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="16dp"/>
 
         <ProgressBar
             android:id="@+id/loadingProgressBar"
@@ -70,7 +70,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="No spending data for this month"
+                android:text="Không có dữ liệu chi tiêu trong tháng này"
                 android:textAlignment="center"
                 android:textSize="18sp"
                 android:textColor="@android:color/darker_gray"/>
@@ -78,7 +78,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Add your first expense to see spending analytics"
+                android:text="Thêm chi tiêu đầu tiên để xem phân tích"
                 android:textAlignment="center"
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray"
@@ -95,7 +95,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Categories"
+            android:text="Danh mục chi tiêu"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -109,5 +109,101 @@
             tools:listitem="@layout/item_category_spending"
             tools:itemCount="5"/>
 
+        <!-- Budget comparison section -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="So sánh với ngân sách"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="12dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Tổng chi tiêu:"/>
+
+                    <TextView
+                        android:id="@+id/totalSpendingTextView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 VNĐ"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Ngân sách tháng:"/>
+
+                    <TextView
+                        android:id="@+id/totalBudgetTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 VNĐ"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical">
+
+                    <ProgressBar
+                        android:id="@+id/budgetProgressBar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="100"
+                        android:progress="0"/>
+
+                    <TextView
+                        android:id="@+id/budgetComparisonTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0%"
+                        android:textStyle="bold"
+                        android:layout_marginStart="8dp"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
+
 </androidx.core.widget.NestedScrollView>
