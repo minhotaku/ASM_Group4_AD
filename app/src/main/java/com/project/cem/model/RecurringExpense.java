@@ -10,12 +10,13 @@ public class RecurringExpense {
     private int year;
     private String recurrenceFrequency;
 
+    private boolean isActive; // Kiểm tra xem tháng sau có cần tự động tạo thêm chi phí định kì hay không.
     public RecurringExpense() {
     }
 
     public RecurringExpense(int recurringExpenseID, int userID, int categoryID,
                             String description, double amount, int month, int year,
-                            String recurrenceFrequency) {
+                            String recurrenceFrequency, boolean isActive) {
         this.recurringExpenseID = recurringExpenseID;
         this.userID = userID;
         this.categoryID = categoryID;
@@ -24,7 +25,7 @@ public class RecurringExpense {
         this.month = month;
         this.year = year;
         this.recurrenceFrequency = recurrenceFrequency;
-
+        this.isActive = isActive;
     }
 
     public int getRecurringExpenseID() {
@@ -89,5 +90,13 @@ public class RecurringExpense {
 
     public void setRecurrenceFrequency(String recurrenceFrequency) {
         this.recurrenceFrequency = recurrenceFrequency;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

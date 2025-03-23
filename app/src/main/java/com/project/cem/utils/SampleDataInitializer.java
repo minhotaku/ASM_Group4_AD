@@ -54,7 +54,7 @@ public class SampleDataInitializer {
                             "(4, 5, 'University tuition', 1500.00, '2025-02-25'), " +
                             "(5, 6, 'Medical checkup', 120.00, '2025-03-10')");
 
-                    // 4. Dữ liệu mẫu cho bảng Budget (sửa startDate, endDate thành month, year)
+                    // 4. Dữ liệu mẫu cho bảng Budget (không thay đổi)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_BUDGET +
                             " (userID, categoryID, amount, month, year) VALUES " +
                             "(1, 1, 200.00, 3, 2025), " +
@@ -64,14 +64,14 @@ public class SampleDataInitializer {
                             "(4, 5, 2000.00, 3, 2025), " +
                             "(5, 6, 500.00, 3, 2025)");
 
-                    // 5. Dữ liệu mẫu cho bảng RecurringExpense (sửa startDate, endDate thành month, year, thêm amount, giới hạn recurrenceFrequency)
+                    // 5. Dữ liệu mẫu cho bảng RecurringExpense (thêm isActive)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
-                            " (userID, categoryID, description, amount, month, year, recurrenceFrequency) VALUES " +
-                            "(1, 5, 'Electricity bill', 50.00, 3, 2025, 'Month'), " +
-                            "(2, 4, 'Monthly rent', 800.00, 3, 2025, 'Month'), " +
-                            "(3, 2, 'Monthly bus pass', 30.00, 3, 2025, 'Month'), " +
-                            "(4, 5, 'Annual education fee', 1500.00, 3, 2025, 'Year'), " +
-                            "(5, 6, 'Health insurance', 1200.00, 3, 2025, 'Year')");
+                            " (userID, categoryID, description, amount, month, year, recurrenceFrequency, isActive) VALUES " +
+                            "(1, 5, 'Electricity bill', 50.00, 3, 2025, 'Month', 1), " +
+                            "(2, 4, 'Monthly rent', 800.00, 3, 2025, 'Month', 1), " +
+                            "(3, 2, 'Monthly bus pass', 30.00, 3, 2025, 'Month', 1), " +
+                            "(4, 5, 'Annual education fee', 1500.00, 3, 2025, 'Year', 1), " +
+                            "(5, 6, 'Health insurance', 1200.00, 3, 2025, 'Year', 0)"); // Ví dụ: 1 record không active
 
                     // 6. Dữ liệu mẫu cho bảng ExpenseReport (không thay đổi)
                     db.execSQL("INSERT INTO " + SQLiteHelper.TABLE_EXPENSE_REPORT +

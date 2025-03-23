@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     // Database version and name
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // Increment version to 2 for the upgrade
     private static final String DATABASE_NAME = "ExpenseManager.db";
 
     // Table names
@@ -70,6 +70,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     "month INTEGER, " +
                     "year INTEGER, " +
                     "recurrenceFrequency VARCHAR(50) CHECK (recurrenceFrequency IN ('Month', 'Year')), " +
+                    "isActive BOOLEAN DEFAULT 1, " + // Added isActive field
                     "FOREIGN KEY (userID) REFERENCES " + TABLE_USER + "(userID) ON DELETE CASCADE, " +
                     "FOREIGN KEY (categoryID) REFERENCES " + TABLE_EXPENSE_CATEGORY + "(categoryID) ON DELETE CASCADE" +
                     ")";
@@ -105,7 +106,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_RECURRING_EXPENSE);
         db.execSQL(CREATE_TABLE_EXPENSE_REPORT);
 
-        // Thêm chỉ mục
+        // Add indexes
         db.execSQL(CREATE_INDEX_EXPENSE_USER);
         db.execSQL(CREATE_INDEX_EXPENSE_CATEGORY);
         db.execSQL(CREATE_INDEX_BUDGET_USER);
@@ -115,7 +116,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
-            db.execSQL("ALTER TABLE " + TABLE_EXPENSE + " ADD COLUMN notes TEXT;");
+            // Add the isActive column to the RecurringExpense table for existing databases
+            db.execSQL("ALTER TABLE " + TABLE_RECURRING_EXPENSE + " ADD COLUMN isActive BOOLEAN DEFAULT 1;");
         }
     }
 
