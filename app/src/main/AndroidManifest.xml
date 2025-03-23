@@ -18,7 +18,7 @@
             android:name=".ui.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.StudentHomeActivity"
+            android:name=".ui.MainActivity"
             android:exported="false" />
         <activity
             android:name=".ui.LoginActivity"

@@ -15,6 +15,9 @@ import android.widget.Button;
 import com.project.cem.R;
 import com.project.cem.ui.LoginActivity;
 import com.project.cem.utils.UserPreferences;
+import com.project.cem.ui.setting.ChangePasswordFragment;
+import com.project.cem.ui.setting.report.ExpenseReportFragment;
+import com.project.cem.ui.setting.recurring.RecurringExpenseFragment;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -70,6 +73,8 @@ public class SettingFragment extends Fragment {
 
         Button btnChangePassword = view.findViewById(R.id.btnGoToChangePassword);
         Button btnLogout = view.findViewById(R.id.btnLogout);
+        Button btnGotoRecurringExpense = view.findViewById(R.id.btnGotoRecurringExpense);
+        Button btnGotoExpenseReport = view.findViewById(R.id.btnGotoExpenseReport);
 
         btnChangePassword.setOnClickListener(v -> {
             Fragment changePasswordFragment = new ChangePasswordFragment();
@@ -78,6 +83,22 @@ public class SettingFragment extends Fragment {
 
             // Thay thế bằng layout của container chứa fragment
             transaction.replace(R.id.frame_layout, changePasswordFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+
+        btnGotoRecurringExpense.setOnClickListener(v -> {
+            Fragment recurringExpenseFragment = new RecurringExpenseFragment();
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.frame_layout, recurringExpenseFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+
+        btnGotoExpenseReport.setOnClickListener(v -> {
+            Fragment expenseReportFragment = new ExpenseReportFragment();
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.frame_layout, expenseReportFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         });

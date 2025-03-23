@@ -14,7 +14,7 @@ import com.project.cem.ui.expenses.ExpensesFragment;
 import com.project.cem.ui.home.HomeFragment;
 import com.project.cem.ui.setting.SettingFragment;
 
-public class StudentHomeActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     ActivityStudentHomeBinding binding;
 
