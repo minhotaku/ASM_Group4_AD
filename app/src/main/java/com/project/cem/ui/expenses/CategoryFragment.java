@@ -1,4 +1,3 @@
-// com.project.cem.ui.expenses/CategoryFragment.java
 package com.project.cem.ui.expenses;
 
 import android.os.Bundle;
@@ -20,9 +19,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.project.cem.R;
+import com.project.cem.model.ExpenseCategory;
 import com.project.cem.model.User;
+import com.project.cem.repository.ExpenseCategoryRepository;
+import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.utils.UserPreferences;
 import com.project.cem.viewmodel.ExpenseCategoryViewModel;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class CategoryFragment extends Fragment {
 
@@ -30,6 +35,12 @@ public class CategoryFragment extends Fragment {
     private CategoryAdapter adapter;
     private RecyclerView recyclerView;
     private int userId;
+    private ExpenseCategoryRepository categoryRepository;
+
+    // Danh sách danh mục mặc định
+    private static final List<String> DEFAULT_CATEGORIES = Arrays.asList(
+            "Food", "Transportation", "Entertainment", "Housing", "Utilities", "Health", "Education"
+    );
 
     public CategoryFragment() {
         // Required empty public constructor
@@ -42,6 +53,10 @@ public class CategoryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Khởi tạo repository
+        SQLiteHelper dbHelper = new SQLiteHelper(requireContext());
+        categoryRepository = new ExpenseCategoryRepository(dbHelper);
 
         // Lắng nghe kết quả từ AddCategoryFragment
         getParentFragmentManager().setFragmentResultListener("category_added_request", this, new FragmentResultListener() {
@@ -124,6 +139,20 @@ public class CategoryFragment extends Fragment {
         User currentUser = UserPreferences.getUser(requireContext());
         if (currentUser != null) {
             userId = currentUser.getUserID();
+
+            // Kiểm tra xem người dùng có danh mục nào chưa
+            List<ExpenseCategory> existingCategories = categoryRepository.getAllCategories(userId);
+            if (existingCategories.isEmpty()) {
+                // Nếu không có danh mục, chèn các danh mục mặc định
+                for (String categoryName : DEFAULT_CATEGORIES) {
+                    ExpenseCategory category = new ExpenseCategory();
+                    category.setCategoryName(categoryName);
+                    category.setUserID(userId);
+                    categoryRepository.insertExpenseCategory(category);
+                }
+            }
+
+            // Lấy danh sách danh mục và cập nhật UI
             viewModel.fetchCategoriesWithCount(userId);
             viewModel.getCategoriesWithCountLiveData().observe(getViewLifecycleOwner(), categories -> {
                 adapter.setCategoryList(categories);

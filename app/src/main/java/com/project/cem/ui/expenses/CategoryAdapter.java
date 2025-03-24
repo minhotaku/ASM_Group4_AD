@@ -1,4 +1,3 @@
-// com.project.cem.ui.expenses/CategoryAdapter.java
 package com.project.cem.ui.expenses;
 
 import android.os.Bundle;
@@ -7,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.project.cem.R;
 import com.project.cem.repository.ExpenseCategoryRepository;
+import com.project.cem.repository.ExpenseRepository;
+import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.viewmodel.ExpenseCategoryViewModel;
 
 import java.util.ArrayList;
@@ -89,22 +91,36 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
             // Xử lý sự kiện nhấn nút Delete
             btnMenu.setOnClickListener(v -> {
-                new AlertDialog.Builder(itemView.getContext())
-                        .setTitle("Delete Category")
-                        .setMessage("Are you sure you want to delete this category?")
-                        .setPositiveButton("Yes", (dialog, which) -> {
-                            // Xóa danh mục
-                            ExpenseCategoryRepository repository = new ExpenseCategoryRepository(itemView.getContext());
-                            repository.deleteExpenseCategory(categoryWithCount.getCategory().getCategoryID());
+                // Kiểm tra số lượng bản ghi chi tiêu liên quan đến danh mục
+                SQLiteHelper dbHelper = new SQLiteHelper(itemView.getContext());
+                ExpenseRepository expenseRepository = new ExpenseRepository(dbHelper);
+                int expenseCount = expenseRepository.getExpenseCountByCategory(categoryWithCount.getCategory().getCategoryID());
 
-                            // Gửi kết quả về CategoryFragment
-                            Bundle result = new Bundle();
-                            result.putBoolean("category_deleted", true);
-                            ((FragmentActivity) itemView.getContext()).getSupportFragmentManager()
-                                    .setFragmentResult("category_deleted_request", result);
-                        })
-                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
-                        .show();
+                if (expenseCount > 0) {
+                    // Nếu danh mục có bản ghi chi tiêu, hiển thị thông báo và không cho phép xóa
+                    new AlertDialog.Builder(itemView.getContext())
+                            .setTitle("Cannot Delete")
+                            .setMessage("Cannot delete category because it has associated expenses")
+                            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                            .show();                } else {
+                    // Nếu không có bản ghi chi tiêu, hiển thị dialog xác nhận xóa
+                    new AlertDialog.Builder(itemView.getContext())
+                            .setTitle("Delete Category")
+                            .setMessage("Are you sure you want to delete this category?")
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                // Xóa danh mục
+                                ExpenseCategoryRepository repository = new ExpenseCategoryRepository(itemView.getContext());
+                                repository.deleteExpenseCategory(categoryWithCount.getCategory().getCategoryID());
+
+                                // Gửi kết quả về CategoryFragment
+                                Bundle result = new Bundle();
+                                result.putBoolean("category_deleted", true);
+                                ((FragmentActivity) itemView.getContext()).getSupportFragmentManager()
+                                        .setFragmentResult("category_deleted_request", result);
+                            })
+                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                            .show();
+                }
             });
         }
     }

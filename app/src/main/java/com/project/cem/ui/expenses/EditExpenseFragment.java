@@ -1,5 +1,6 @@
 package com.project.cem.ui.expenses;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -30,6 +32,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -48,6 +51,7 @@ public class EditExpenseFragment extends Fragment {
     private ExpenseCategoryRepository categoryRepository;
     private List<ExpenseCategory> allCategories;
     private List<String> categoryNames;
+    private Calendar selectedDate; // Để lưu ngày được chọn
 
     public EditExpenseFragment() {
         // Required empty public constructor
@@ -81,6 +85,10 @@ public class EditExpenseFragment extends Fragment {
             expense.setDate(new Date(getArguments().getLong("date")));
             expense.setCategoryID(getArguments().getInt("category_id"));
             expense.setUserID(getArguments().getInt("user_id"));
+
+            // Khởi tạo selectedDate với ngày hiện tại của chi tiêu
+            selectedDate = Calendar.getInstance();
+            selectedDate.setTime(expense.getDate());
         }
 
         // Lấy danh sách tất cả danh mục
@@ -121,6 +129,8 @@ public class EditExpenseFragment extends Fragment {
             etAmount.setText(decimalFormat.format((long) expense.getAmount()));
 
             etDescription.setText(expense.getDescription() != null ? expense.getDescription() : "");
+
+            // Hiển thị ngày hiện tại của chi tiêu
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             etDate.setText(dateFormat.format(expense.getDate()));
 
@@ -172,6 +182,9 @@ public class EditExpenseFragment extends Fragment {
                 }
             }
         });
+
+        // Thiết lập DatePickerDialog khi nhấn vào EditText ngày
+        etDate.setOnClickListener(v -> showDatePickerDialog());
 
         // Thiết lập Toolbar
         Toolbar toolbar = view.findViewById(R.id.toolbar);
@@ -225,5 +238,23 @@ public class EditExpenseFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void showDatePickerDialog() {
+        int year = selectedDate.get(Calendar.YEAR);
+        int month = selectedDate.get(Calendar.MONTH);
+        int day = selectedDate.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                requireContext(),
+                (view, yearSelected, monthOfYear, dayOfMonth) -> {
+                    selectedDate.set(yearSelected, monthOfYear, dayOfMonth);
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                    etDate.setText(sdf.format(selectedDate.getTime()));
+                    expense.setDate(selectedDate.getTime()); // Cập nhật ngày vào expense
+                },
+                year, month, day
+        );
+        datePickerDialog.show();
     }
 }

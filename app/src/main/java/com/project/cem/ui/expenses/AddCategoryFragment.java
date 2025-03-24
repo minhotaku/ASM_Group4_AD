@@ -1,5 +1,6 @@
 package com.project.cem.ui.expenses;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,7 +84,11 @@ public class AddCategoryFragment extends Fragment {
             boolean isCategoryExists = existingCategories.stream()
                     .anyMatch(cat -> cat.getCategoryName().equalsIgnoreCase(categoryName));
             if (isCategoryExists) {
-                Toast.makeText(getContext(), "Category already exists", Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Category Exists")
+                        .setMessage("Category already exists,please add another category")
+                        .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                        .show();
                 return;
             }
 
