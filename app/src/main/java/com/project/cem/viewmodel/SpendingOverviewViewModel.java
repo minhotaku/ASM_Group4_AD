@@ -70,28 +70,6 @@ public class SpendingOverviewViewModel extends AndroidViewModel {
                 List<CategorySpending> regularSpending = spendingOverviewRepository.getCategorySpendingByMonth(
                         userId, currentMonth, currentYear);
 
-                // Get recurring expenses for this month
-                List<CategorySpending> recurringSpending = spendingOverviewRepository.getRecurringExpenses(
-                        userId, currentMonth, currentYear);
-
-                // Merge regular and recurring expenses
-                for (CategorySpending recurring : recurringSpending) {
-                    boolean found = false;
-                    for (CategorySpending regular : regularSpending) {
-                        if (regular.getCategoryId() == recurring.getCategoryId()) {
-                            // Add recurring amount to the same category
-                            regular.setAmount(regular.getAmount() + recurring.getAmount());
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    // If category is not in regular expenses, add it
-                    if (!found) {
-                        regularSpending.add(recurring);
-                    }
-                }
-
                 // Calculate total spending
                 double total = 0;
                 for (CategorySpending item : regularSpending) {
@@ -128,9 +106,8 @@ public class SpendingOverviewViewModel extends AndroidViewModel {
                     regularSpending.get(i).setColorCode(colorArray[i % colorArray.length]);
                 }
 
-                // Hàm lấy tổng ngân sách hàng tháng của người dùng ( Tổng = chi tiêu cố định + ngân sách trong tháng)
-                double budget = spendingOverviewRepository.getTotalBudgetForMonth(userId, currentMonth, currentYear) +
-                        spendingOverviewRepository.getMonthlyRecurringExpense(userId, currentMonth, currentYear);
+                // Get total budget for the month
+                double budget = spendingOverviewRepository.getTotalBudgetForMonth(userId, currentMonth, currentYear);
 
                 // Calculate budget percentage
                 double budgetPct = (budget > 0) ? (total / budget) * 100 : 0;
