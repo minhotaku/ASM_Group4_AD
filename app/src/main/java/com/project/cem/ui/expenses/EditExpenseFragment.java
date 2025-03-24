@@ -1,6 +1,8 @@
 package com.project.cem.ui.expenses;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,8 @@ import com.project.cem.repository.ExpenseCategoryRepository;
 import com.project.cem.repository.ExpenseRepository;
 import com.project.cem.utils.SQLiteHelper;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,8 +46,8 @@ public class EditExpenseFragment extends Fragment {
     private Button btnSave;
     private ExpenseRepository expenseRepository;
     private ExpenseCategoryRepository categoryRepository;
-    private List<ExpenseCategory> allCategories; // Danh sách tất cả danh mục
-    private List<String> categoryNames; // Danh sách tên danh mục để hiển thị trong Spinner
+    private List<ExpenseCategory> allCategories;
+    private List<String> categoryNames;
 
     public EditExpenseFragment() {
         // Required empty public constructor
@@ -109,7 +113,13 @@ public class EditExpenseFragment extends Fragment {
 
         // Hiển thị thông tin chi tiêu hiện tại
         if (expense != null) {
-            etAmount.setText(String.format(Locale.getDefault(), "%.2f", expense.getAmount()));
+            // Định dạng số tiền ban đầu với dấu chấm phân cách phần nghìn
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+            symbols.setGroupingSeparator('.');
+            DecimalFormat decimalFormat = new DecimalFormat("#,###", symbols);
+            decimalFormat.setMaximumFractionDigits(0);
+            etAmount.setText(decimalFormat.format((long) expense.getAmount()));
+
             etDescription.setText(expense.getDescription() != null ? expense.getDescription() : "");
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             etDate.setText(dateFormat.format(expense.getDate()));
@@ -124,6 +134,45 @@ public class EditExpenseFragment extends Fragment {
             }
         }
 
+        // Thêm TextWatcher để định dạng số tiền khi nhập
+        etAmount.addTextChangedListener(new TextWatcher() {
+            private String current = "";
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().equals(current)) {
+                    etAmount.removeTextChangedListener(this);
+
+                    String cleanString = s.toString().replaceAll("[^\\d]", "");
+                    if (!cleanString.isEmpty()) {
+                        try {
+                            long parsed = Long.parseLong(cleanString);
+                            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+                            symbols.setGroupingSeparator('.');
+                            DecimalFormat decimalFormat = new DecimalFormat("#,###", symbols);
+                            decimalFormat.setMaximumFractionDigits(0);
+                            String formatted = decimalFormat.format(parsed);
+                            current = formatted;
+                            etAmount.setText(formatted);
+                            etAmount.setSelection(formatted.length());
+                        } catch (NumberFormatException e) {
+                            etAmount.setText("");
+                        }
+                    } else {
+                        current = "";
+                    }
+
+                    etAmount.addTextChangedListener(this);
+                }
+            }
+        });
+
         // Thiết lập Toolbar
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
@@ -136,7 +185,7 @@ public class EditExpenseFragment extends Fragment {
 
         // Xử lý sự kiện nhấn nút Save
         btnSave.setOnClickListener(v -> {
-            String amountStr = etAmount.getText().toString().trim();
+            String amountStr = etAmount.getText().toString().replaceAll("[^\\d]", "").trim(); // Loại bỏ dấu chấm để parse
             int selectedCategoryPosition = spinnerCategory.getSelectedItemPosition();
             String description = etDescription.getText().toString().trim();
             String dateStr = etDate.getText().toString().trim();

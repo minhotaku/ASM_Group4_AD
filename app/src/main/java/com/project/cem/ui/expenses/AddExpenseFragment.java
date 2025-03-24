@@ -2,6 +2,8 @@ package com.project.cem.ui.expenses;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,8 @@ import com.project.cem.repository.ExpenseRepository;
 import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.utils.UserPreferences;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -46,7 +50,7 @@ public class AddExpenseFragment extends Fragment {
         super.onCreate(savedInstanceState);
         SQLiteHelper dbHelper = new SQLiteHelper(requireContext());
         expenseRepository = new ExpenseRepository(dbHelper);
-        selectedDate = Calendar.getInstance();
+        selectedDate = Calendar.getInstance(); // Khởi tạo với ngày hiện tại
     }
 
     @Nullable
@@ -78,8 +82,51 @@ public class AddExpenseFragment extends Fragment {
         // Load danh sách danh mục vào Spinner
         loadCategories();
 
+        // Thiết lập ngày mặc định là ngày hôm nay
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        etDate.setText(sdf.format(selectedDate.getTime()));
+
         // Thiết lập DatePickerDialog khi nhấn vào EditText ngày
         etDate.setOnClickListener(v -> showDatePickerDialog());
+
+        // Thêm TextWatcher để định dạng số tiền khi nhập
+        etAmount.addTextChangedListener(new TextWatcher() {
+            private String current = "";
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().equals(current)) {
+                    etAmount.removeTextChangedListener(this);
+
+                    String cleanString = s.toString().replaceAll("[^\\d]", "");
+                    if (!cleanString.isEmpty()) {
+                        try {
+                            long parsed = Long.parseLong(cleanString);
+                            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+                            symbols.setGroupingSeparator('.');
+                            DecimalFormat decimalFormat = new DecimalFormat("#,###", symbols);
+                            decimalFormat.setMaximumFractionDigits(0);
+                            String formatted = decimalFormat.format(parsed);
+                            current = formatted;
+                            etAmount.setText(formatted);
+                            etAmount.setSelection(formatted.length());
+                        } catch (NumberFormatException e) {
+                            etAmount.setText("");
+                        }
+                    } else {
+                        current = "";
+                    }
+
+                    etAmount.addTextChangedListener(this);
+                }
+            }
+        });
 
         // Xử lý sự kiện nhấn nút Save
         btnSave.setOnClickListener(v -> saveExpense());
@@ -125,7 +172,7 @@ public class AddExpenseFragment extends Fragment {
 
     private void saveExpense() {
         String description = etDescription.getText().toString().trim();
-        String amountStr = etAmount.getText().toString().trim();
+        String amountStr = etAmount.getText().toString().replaceAll("[^\\d]", "").trim(); // Loại bỏ dấu chấm để parse
         int selectedCategoryPosition = spinnerCategory.getSelectedItemPosition();
 
         if (description.isEmpty() || amountStr.isEmpty() || etDate.getText().toString().isEmpty() || selectedCategoryPosition == -1) {
