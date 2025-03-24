@@ -1,5 +1,7 @@
 package com.project.cem.ui.expenses;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -8,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -41,6 +44,9 @@ public class CategoryFragment extends Fragment {
     private static final List<String> DEFAULT_CATEGORIES = Arrays.asList(
             "Food", "Transportation", "Entertainment", "Housing", "Utilities", "Health", "Education"
     );
+
+    // Biến static để kiểm soát việc hiển thị thông báo trong một phiên làm việc
+    private static boolean hasShownEmptyDialogInSession = false;
 
     public CategoryFragment() {
         // Required empty public constructor
@@ -140,22 +146,47 @@ public class CategoryFragment extends Fragment {
         if (currentUser != null) {
             userId = currentUser.getUserID();
 
-            // Kiểm tra xem người dùng có danh mục nào chưa
-            List<ExpenseCategory> existingCategories = categoryRepository.getAllCategories(userId);
-            if (existingCategories.isEmpty()) {
-                // Nếu không có danh mục, chèn các danh mục mặc định
+            // Sử dụng SharedPreferences để kiểm tra xem danh mục mặc định đã được chèn chưa
+            SharedPreferences prefs = requireContext().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+            String prefKey = "default_categories_inserted_" + userId;
+            boolean isDefaultCategoriesInserted = prefs.getBoolean(prefKey, false);
+
+            if (!isDefaultCategoriesInserted) {
+                // Nếu chưa chèn danh mục mặc định, chèn các danh mục mặc định
                 for (String categoryName : DEFAULT_CATEGORIES) {
                     ExpenseCategory category = new ExpenseCategory();
                     category.setCategoryName(categoryName);
                     category.setUserID(userId);
                     categoryRepository.insertExpenseCategory(category);
                 }
+                // Đánh dấu rằng danh mục mặc định đã được chèn
+                prefs.edit().putBoolean(prefKey, true).apply();
             }
 
             // Lấy danh sách danh mục và cập nhật UI
             viewModel.fetchCategoriesWithCount(userId);
             viewModel.getCategoriesWithCountLiveData().observe(getViewLifecycleOwner(), categories -> {
                 adapter.setCategoryList(categories);
+                // Kiểm tra nếu danh sách rỗng và chưa hiển thị dialog trong phiên làm việc này
+                if (categories.isEmpty() && !hasShownEmptyDialogInSession) {
+                    // Đặt cờ để ngăn hiển thị lại trong cùng phiên làm việc
+                    hasShownEmptyDialogInSession = true;
+
+                    // Hiển thị dialog
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle("No Categories")
+                            .setMessage("No categories available. Add a new category.")
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                // Chuyển đến AddCategoryFragment
+                                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                                transaction.replace(getId(), AddCategoryFragment.newInstance());
+                                transaction.addToBackStack(null);
+                                transaction.commit();
+                            })
+                            .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                            .setCancelable(false) // Ngăn người dùng đóng dialog bằng nút Back
+                            .show();
+                }
             });
         }
     }
