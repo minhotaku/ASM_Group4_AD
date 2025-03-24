@@ -1,4 +1,3 @@
-// com.project.cem.repository/ExpenseRepository.java
 package com.project.cem.repository;
 
 import android.content.ContentValues;
@@ -59,7 +58,8 @@ public class ExpenseRepository {
     public List<Expense> getAllExpenses(int userId) {
         List<Expense> expenses = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String query = "SELECT * FROM " + SQLiteHelper.TABLE_EXPENSE + " WHERE userID = ?";
+        // Sửa câu truy vấn để sắp xếp theo thời gian giảm dần (mới nhất đến cũ nhất)
+        String query = "SELECT * FROM " + SQLiteHelper.TABLE_EXPENSE + " WHERE userID = ? ORDER BY date DESC";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
         if (cursor.moveToFirst()) {
             do {
