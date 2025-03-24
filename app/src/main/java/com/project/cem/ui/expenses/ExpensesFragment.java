@@ -1,4 +1,3 @@
-// com.project.cem.ui.expenses/ExpensesFragment.java
 package com.project.cem.ui.expenses;
 
 import android.os.Bundle;
@@ -11,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
@@ -19,8 +19,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.project.cem.R;
-import com.project.cem.model.Expense;
 import com.project.cem.model.User;
 import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.utils.UserPreferences;
@@ -114,17 +114,25 @@ public class ExpensesFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.expenseRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        expenseAdapter = new ExpenseAdapter(expenseViewModel, expense -> {
-            // Mở EditExpenseFragment khi nhấn vào một mục chi tiêu
+        expenseAdapter = new ExpenseAdapter(expenseViewModel, getId()); // Truyền getId() vào constructor
+        recyclerView.setAdapter(expenseAdapter);
+
+        // Thiết lập Toolbar làm ActionBar
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            activity.setSupportActionBar(toolbar);
+            activity.getSupportActionBar().setTitle("Expenses");
+        }
+
+        // Xử lý sự kiện nhấn FloatingActionButton
+        FloatingActionButton fabAddExpense = view.findViewById(R.id.fabAddExpense);
+        fabAddExpense.setOnClickListener(v -> {
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(getId(), EditExpenseFragment.newInstance(expense));
+            transaction.replace(getId(), new AddExpenseFragment());
             transaction.addToBackStack(null);
             transaction.commit();
         });
-        recyclerView.setAdapter(expenseAdapter);
-
-        Toolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.setTitle("Expenses");
 
         return view;
     }
@@ -145,15 +153,16 @@ public class ExpensesFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_menu, menu); // Sử dụng toolbar_menu đã tạo
+        inflater.inflate(R.menu.toolbar_menu_expenses, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_add) { // Sử dụng action_add đã định nghĩa
+        if (item.getItemId() == R.id.action_category) {
+            // Mở CategoryFragment khi nhấn vào item "Category"
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            transaction.replace(getId(), new AddExpenseFragment());
+            transaction.replace(getId(), CategoryFragment.newInstance());
             transaction.addToBackStack(null);
             transaction.commit();
             return true;

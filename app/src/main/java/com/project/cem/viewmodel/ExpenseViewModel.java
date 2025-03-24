@@ -20,7 +20,7 @@ public class ExpenseViewModel extends ViewModel {
 
     // Lấy danh sách chi tiêu theo userID
     public void fetchExpenses(int userId) {
-        List<Expense> expenses = expenseRepository.getExpensesByUserId(userId);
+        List<Expense> expenses = expenseRepository.getAllExpenses(userId);
         expensesLiveData.setValue(expenses);
     }
 

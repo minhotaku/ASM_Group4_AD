@@ -16,29 +16,40 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/teal_200"
-            app:title="Expense Category"
+            app:title="Add Category"
             app:titleTextColor="@color/white"
             app:navigationIcon="@android:drawable/ic_menu_revert"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- RecyclerView hiển thị danh sách danh mục -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/expenseRecyclerView"
+    <!-- Nội dung -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:padding="16dp"/>
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <!-- FloatingActionButton cho nút Add -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddExpense"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@android:color/holo_blue_light"
-        app:fabSize="normal"/>
+        <EditText
+            android:id="@+id/etCategoryName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Category Name"
+            android:inputType="text"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"/>
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:text="Save"
+            android:backgroundTint="@color/teal_200"
+            android:textColor="@color/white"/>
+
+    </LinearLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,66 +1,58 @@
-// com.project.cem.ui.expenses/EditExpenseFragment.java
 package com.project.cem.ui.expenses;
 
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.project.cem.R;
 import com.project.cem.model.Expense;
-import com.project.cem.model.User;
+import com.project.cem.model.ExpenseCategory;
+import com.project.cem.repository.ExpenseCategoryRepository;
 import com.project.cem.repository.ExpenseRepository;
 import com.project.cem.utils.SQLiteHelper;
-import com.project.cem.utils.UserPreferences;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class EditExpenseFragment extends Fragment {
 
-    private static final String ARG_EXPENSE_ID = "expense_id";
-    private static final String ARG_USER_ID = "user_id";
-    private static final String ARG_DESCRIPTION = "description";
-    private static final String ARG_CATEGORY_ID = "category_id";
-    private static final String ARG_AMOUNT = "amount";
-    private static final String ARG_DATE = "date";
+    private static final String ARG_EXPENSE = "expense";
 
-    private EditText etDescription, etAmount, etDate;
-    private Spinner spinnerCategory;
-    private Button btnSave, btnDelete;
-    private ImageButton btnPickDate;
+    private Expense expense;
+    private EditText etAmount;
+    private EditText etCategory;
+    private EditText etDescription;
+    private EditText etDate;
+    private Button btnSave;
     private ExpenseRepository expenseRepository;
-    private List<AddExpenseFragment.CategoryItem> categoryList;
-    private Calendar selectedDate;
-    private Expense expense; // Chi tiêu được truyền vào để chỉnh sửa
+    private ExpenseCategoryRepository categoryRepository;
+
+    public EditExpenseFragment() {
+        // Required empty public constructor
+    }
 
     public static EditExpenseFragment newInstance(Expense expense) {
         EditExpenseFragment fragment = new EditExpenseFragment();
         Bundle args = new Bundle();
-        // Truyền từng thuộc tính của Expense qua Bundle
-        args.putInt(ARG_EXPENSE_ID, expense.getExpenseID());
-        args.putInt(ARG_USER_ID, expense.getUserID());
-        args.putString(ARG_DESCRIPTION, expense.getDescription());
-        args.putInt(ARG_CATEGORY_ID, expense.getCategoryID());
-        args.putDouble(ARG_AMOUNT, expense.getAmount());
-        // Truyền Date dưới dạng long (milliseconds)
-        args.putLong(ARG_DATE, expense.getDate() != null ? expense.getDate().getTime() : -1);
+        args.putInt("expense_id", expense.getExpenseID());
+        args.putDouble("amount", expense.getAmount());
+        args.putInt("category_id", expense.getCategoryID());
+        args.putString("description", expense.getDescription());
+        args.putLong("date", expense.getDate().getTime());
+        args.putInt("user_id", expense.getUserID());
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,171 +62,107 @@ public class EditExpenseFragment extends Fragment {
         super.onCreate(savedInstanceState);
         SQLiteHelper dbHelper = new SQLiteHelper(requireContext());
         expenseRepository = new ExpenseRepository(dbHelper);
+        categoryRepository = new ExpenseCategoryRepository(dbHelper);
 
-        // Tái tạo đối tượng Expense từ các giá trị trong Bundle
         if (getArguments() != null) {
-            int expenseId = getArguments().getInt(ARG_EXPENSE_ID);
-            int userId = getArguments().getInt(ARG_USER_ID);
-            String description = getArguments().getString(ARG_DESCRIPTION);
-            int categoryId = getArguments().getInt(ARG_CATEGORY_ID);
-            double amount = getArguments().getDouble(ARG_AMOUNT);
-            long dateMillis = getArguments().getLong(ARG_DATE);
-            Date date = dateMillis != -1 ? new Date(dateMillis) : null;
-
-            expense = new Expense(expenseId, userId, description, categoryId, amount, date);
-        }
-
-        selectedDate = Calendar.getInstance();
-        if (expense.getDate() != null) {
-            selectedDate.setTime(expense.getDate());
+            expense = new Expense();
+            expense.setExpenseID(getArguments().getInt("expense_id"));
+            expense.setAmount(getArguments().getDouble("amount"));
+            expense.setDescription(getArguments().getString("description"));
+            expense.setDate(new Date(getArguments().getLong("date")));
+            expense.setCategoryID(getArguments().getInt("category_id"));
+            expense.setUserID(getArguments().getInt("user_id"));
         }
     }
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit_expense, container, false);
 
-        etDescription = view.findViewById(R.id.etDescription);
         etAmount = view.findViewById(R.id.etAmount);
+        etCategory = view.findViewById(R.id.etCategory);
+        etDescription = view.findViewById(R.id.etDescription);
         etDate = view.findViewById(R.id.etDate);
-        spinnerCategory = view.findViewById(R.id.spinnerCategory);
         btnSave = view.findViewById(R.id.btnSave);
-        btnDelete = view.findViewById(R.id.btnDelete);
-        btnPickDate = view.findViewById(R.id.btnPickDate);
 
-        // Điền dữ liệu hiện tại vào các trường
-        etDescription.setText(expense.getDescription());
-        etAmount.setText(String.format(Locale.getDefault(), "%.2f", expense.getAmount()));
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        etDate.setText(expense.getDate() != null ? sdf.format(expense.getDate()) : "");
+        // Hiển thị thông tin chi tiêu hiện tại
+        if (expense != null) {
+            etAmount.setText(String.format(Locale.getDefault(), "%.2f", expense.getAmount()));
+            // Lấy categoryName từ categoryID
+            String categoryName = categoryRepository.getCategoryNameById(expense.getCategoryID());
+            etCategory.setText(categoryName != null ? categoryName : "Unknown Category");
+            etDescription.setText(expense.getDescription() != null ? expense.getDescription() : "");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            etDate.setText(dateFormat.format(expense.getDate()));
+        }
 
-        // Load danh sách danh mục
-        loadCategories();
-
-        // Thiết lập DatePickerDialog
-        btnPickDate.setOnClickListener(v -> showDatePickerDialog());
+        // Thiết lập Toolbar
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            activity.setSupportActionBar(toolbar);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            activity.getSupportActionBar().setTitle("Edit Expense");
+        }
+        toolbar.setNavigationOnClickListener(v -> getParentFragmentManager().popBackStack());
 
         // Xử lý sự kiện nhấn nút Save
-        btnSave.setOnClickListener(v -> confirmSave());
+        btnSave.setOnClickListener(v -> {
+            String amountStr = etAmount.getText().toString().trim();
+            String categoryName = etCategory.getText().toString().trim();
+            String description = etDescription.getText().toString().trim();
+            String dateStr = etDate.getText().toString().trim();
 
-        // Xử lý sự kiện nhấn nút Delete
-        btnDelete.setOnClickListener(v -> confirmDelete());
+            if (amountStr.isEmpty() || categoryName.isEmpty() || dateStr.isEmpty()) {
+                Toast.makeText(getContext(), "Please fill in all required fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                double amount = Double.parseDouble(amountStr);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                Date date = dateFormat.parse(dateStr);
+
+                // Tìm categoryID từ categoryName
+                int categoryId = findCategoryIdByName(categoryName, expense.getUserID());
+                if (categoryId == -1) {
+                    Toast.makeText(getContext(), "Category not found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Cập nhật chi tiêu
+                expense.setAmount(amount);
+                expense.setCategoryID(categoryId);
+                expense.setDescription(description);
+                expense.setDate(date);
+                expenseRepository.updateExpense(expense);
+
+                // Gửi kết quả về ExpensesFragment
+                Bundle result = new Bundle();
+                result.putBoolean("expense_updated", true);
+                getParentFragmentManager().setFragmentResult("expense_updated_request", result);
+
+                // Quay lại ExpensesFragment
+                getParentFragmentManager().popBackStack();
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid amount format", Toast.LENGTH_SHORT).show();
+            } catch (ParseException e) {
+                Toast.makeText(getContext(), "Invalid date format (dd/MM/yyyy)", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         return view;
     }
 
-    private void showDatePickerDialog() {
-        int year = selectedDate.get(Calendar.YEAR);
-        int month = selectedDate.get(Calendar.MONTH);
-        int day = selectedDate.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                requireContext(),
-                (view, yearSelected, monthOfYear, dayOfMonth) -> {
-                    selectedDate.set(yearSelected, monthOfYear, dayOfMonth);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    etDate.setText(sdf.format(selectedDate.getTime()));
-                },
-                year, month, day
-        );
-        datePickerDialog.show();
-    }
-
-    private void loadCategories() {
-        categoryList = new ArrayList<>();
-        User currentUser = UserPreferences.getUser(requireContext());
-        if (currentUser != null) {
-            int userId = currentUser.getUserID();
-            categoryList = expenseRepository.getCategoriesByUserId(userId);
-        }
-
-        List<String> categoryNames = new ArrayList<>();
-        for (AddExpenseFragment.CategoryItem category : categoryList) {
-            categoryNames.add(category.getCategoryName());
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, categoryNames);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
-
-        // Chọn danh mục hiện tại của chi tiêu
-        for (int i = 0; i < categoryList.size(); i++) {
-            if (categoryList.get(i).getCategoryId() == expense.getCategoryID()) {
-                spinnerCategory.setSelection(i);
-                break;
+    // Phương thức để tìm categoryID từ categoryName
+    private int findCategoryIdByName(String categoryName, int userId) {
+        List<ExpenseCategory> categories = categoryRepository.getAllCategories(userId);
+        for (ExpenseCategory category : categories) {
+            if (category.getCategoryName().equalsIgnoreCase(categoryName)) {
+                return category.getCategoryID();
             }
         }
-    }
-
-    private void confirmSave() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Confirm Save")
-                .setMessage("Are you sure you want to save changes?")
-                .setPositiveButton("Yes", (dialog, which) -> saveExpense())
-                .setNegativeButton("No", null)
-                .show();
-    }
-
-    private void saveExpense() {
-        String description = etDescription.getText().toString().trim();
-        String amountStr = etAmount.getText().toString().trim();
-        int selectedCategoryPosition = spinnerCategory.getSelectedItemPosition();
-
-        if (description.isEmpty() || amountStr.isEmpty() || etDate.getText().toString().isEmpty() || selectedCategoryPosition == -1) {
-            Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        double amount;
-        try {
-            amount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            Toast.makeText(requireContext(), "Invalid amount", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Date date = selectedDate.getTime();
-        int categoryId = categoryList.get(selectedCategoryPosition).getCategoryId();
-
-        // Cập nhật thông tin chi tiêu
-        expense.setDescription(description);
-        expense.setAmount(amount);
-        expense.setDate(date);
-        expense.setCategoryID(categoryId);
-
-        // Lưu vào cơ sở dữ liệu
-        expenseRepository.updateExpense(expense);
-
-        // Gửi kết quả để thông báo rằng chi tiêu đã được chỉnh sửa
-        Bundle result = new Bundle();
-        result.putBoolean("expense_updated", true);
-        getParentFragmentManager().setFragmentResult("expense_updated_request", result);
-
-        Toast.makeText(requireContext(), "Expense updated successfully", Toast.LENGTH_SHORT).show();
-        getParentFragmentManager().popBackStack();
-    }
-
-    private void confirmDelete() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Confirm Delete")
-                .setMessage("Are you sure you want to delete this expense?")
-                .setPositiveButton("Yes", (dialog, which) -> deleteExpense())
-                .setNegativeButton("No", null)
-                .show();
-    }
-
-    private void deleteExpense() {
-        // Xóa chi tiêu khỏi cơ sở dữ liệu
-        expenseRepository.deleteExpense(expense.getExpenseID());
-
-        // Gửi kết quả để thông báo rằng chi tiêu đã bị xóa
-        Bundle result = new Bundle();
-        result.putBoolean("expense_deleted", true);
-        getParentFragmentManager().setFragmentResult("expense_deleted_request", result);
-
-        Toast.makeText(requireContext(), "Expense deleted successfully", Toast.LENGTH_SHORT).show();
-        getParentFragmentManager().popBackStack();
+        return -1; // Trả về -1 nếu không tìm thấy
     }
 }

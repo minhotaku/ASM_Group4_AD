@@ -25,7 +25,7 @@
 
     <!-- RecyclerView hiển thị danh sách danh mục -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/expenseRecyclerView"
+        android:id="@+id/categoryRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -33,7 +33,7 @@
 
     <!-- FloatingActionButton cho nút Add -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddExpense"
+        android:id="@+id/fabAddCategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
@@ -41,4 +41,5 @@
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="@android:color/holo_blue_light"
         app:fabSize="normal"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

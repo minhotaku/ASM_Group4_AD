@@ -43,8 +43,8 @@
         android:hint="Select Date"
         android:inputType="none"
         android:focusable="false"
-    android:focusableInTouchMode="false"
-    android:layout_marginBottom="16dp"/>
+        android:focusableInTouchMode="false"
+        android:layout_marginBottom="16dp"/>
 
     <Button
         android:id="@+id/btnSave"
