@@ -19,6 +19,7 @@ import com.project.cem.repository.ExpenseRepository;
 import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.viewmodel.ExpenseViewModel;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,43 +63,38 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
     class ExpenseViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvAmount;
         private final TextView tvCategory;
-        private final TextView tvDescription; // Thêm TextView cho description
+        private final TextView tvDescription;
         private final TextView tvDate;
 
         public ExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
             tvAmount = itemView.findViewById(R.id.tvAmount);
             tvCategory = itemView.findViewById(R.id.tvCategory);
-            tvDescription = itemView.findViewById(R.id.tvDescription); // Khởi tạo tvDescription
+            tvDescription = itemView.findViewById(R.id.tvDescription);
             tvDate = itemView.findViewById(R.id.tvDate);
 
             // Xử lý nhấn giữ (long press) để hiển thị menu ngữ cảnh
             itemView.setOnLongClickListener(v -> {
-                // Tạo menu ngữ cảnh với 2 tùy chọn: Edit và Delete
                 CharSequence[] options = new CharSequence[]{"Edit", "Delete"};
                 new AlertDialog.Builder(itemView.getContext())
                         .setTitle("Choose an action")
                         .setItems(options, (dialog, which) -> {
                             Expense expense = expenseList.get(getAdapterPosition());
                             if (which == 0) { // Edit
-                                // Mở EditExpenseFragment
                                 FragmentActivity activity = (FragmentActivity) itemView.getContext();
                                 FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
                                 transaction.replace(containerId, EditExpenseFragment.newInstance(expense));
                                 transaction.addToBackStack(null);
                                 transaction.commit();
                             } else if (which == 1) { // Delete
-                                // Hiển thị thông báo xác nhận xóa
                                 new AlertDialog.Builder(itemView.getContext())
                                         .setTitle("Delete Expense")
                                         .setMessage("Are you sure you want to delete this expense?")
                                         .setPositiveButton("Yes", (deleteDialog, deleteWhich) -> {
-                                            // Xóa chi tiêu
                                             SQLiteHelper dbHelper = new SQLiteHelper(itemView.getContext());
                                             ExpenseRepository repository = new ExpenseRepository(dbHelper);
                                             repository.deleteExpense(expense.getExpenseID());
 
-                                            // Gửi kết quả về ExpensesFragment để cập nhật danh sách
                                             Bundle result = new Bundle();
                                             result.putBoolean("expense_deleted", true);
                                             ((FragmentActivity) itemView.getContext()).getSupportFragmentManager()
@@ -114,13 +110,20 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
         }
 
         public void bind(Expense expense) {
-            tvAmount.setText(String.format(Locale.getDefault(), "%.2f", expense.getAmount()));
+            // Định dạng amount với phân cách phần nghìn và thêm "VNĐ"
+            DecimalFormat decimalFormat = new DecimalFormat("#,###");
+            String formattedAmount = decimalFormat.format(expense.getAmount()) + " VNĐ";
+            tvAmount.setText(formattedAmount);
+
             // Lấy categoryName từ categoryID
             ExpenseCategoryRepository categoryRepository = new ExpenseCategoryRepository(itemView.getContext());
             String categoryName = categoryRepository.getCategoryNameById(expense.getCategoryID());
             tvCategory.setText(categoryName != null ? categoryName : "Unknown Category");
+
             // Hiển thị description
             tvDescription.setText(expense.getDescription() != null ? expense.getDescription() : "No description");
+
+            // Hiển thị ngày
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             tvDate.setText(dateFormat.format(expense.getDate()));
         }

@@ -31,12 +31,10 @@
         android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <EditText
-            android:id="@+id/etCategoryName"
+        <Spinner
+            android:id="@+id/spinnerCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Category Name"
-            android:inputType="text"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"/>
 

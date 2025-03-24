@@ -1,4 +1,3 @@
-// com.project.cem.ui.expenses/AddExpenseFragment.java
 package com.project.cem.ui.expenses;
 
 import android.app.DatePickerDialog;
@@ -15,6 +14,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.project.cem.R;
@@ -35,17 +36,17 @@ public class AddExpenseFragment extends Fragment {
 
     private EditText etDescription, etAmount, etDate;
     private Spinner spinnerCategory;
-    private Button btnSave;
+    private Button btnSave, btnBack;
     private ExpenseRepository expenseRepository;
     private List<CategoryItem> categoryList;
-    private Calendar selectedDate; // Lưu ngày được chọn
+    private Calendar selectedDate;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SQLiteHelper dbHelper = new SQLiteHelper(requireContext());
         expenseRepository = new ExpenseRepository(dbHelper);
-        selectedDate = Calendar.getInstance(); // Khởi tạo ngày mặc định là ngày hiện tại
+        selectedDate = Calendar.getInstance();
     }
 
     @Nullable
@@ -53,11 +54,26 @@ public class AddExpenseFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_expense, container, false);
 
+        // Khởi tạo các view
         etDescription = view.findViewById(R.id.etDescription);
         etAmount = view.findViewById(R.id.etAmount);
         etDate = view.findViewById(R.id.etDate);
         spinnerCategory = view.findViewById(R.id.spinnerCategory);
         btnSave = view.findViewById(R.id.btnSave);
+        btnBack = view.findViewById(R.id.btnBack);
+
+        // Thiết lập Toolbar
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            activity.setSupportActionBar(toolbar);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            activity.getSupportActionBar().setTitle("Add Expense");
+        }
+        toolbar.setNavigationOnClickListener(v -> getParentFragmentManager().popBackStack());
+
+        // Xử lý nút Back
+        btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
         // Load danh sách danh mục vào Spinner
         loadCategories();
@@ -72,18 +88,14 @@ public class AddExpenseFragment extends Fragment {
     }
 
     private void showDatePickerDialog() {
-        // Lấy ngày hiện tại làm mặc định
         int year = selectedDate.get(Calendar.YEAR);
         int month = selectedDate.get(Calendar.MONTH);
         int day = selectedDate.get(Calendar.DAY_OF_MONTH);
 
-        // Tạo DatePickerDialog
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 requireContext(),
                 (view, yearSelected, monthOfYear, dayOfMonth) -> {
-                    // Cập nhật ngày được chọn
                     selectedDate.set(yearSelected, monthOfYear, dayOfMonth);
-                    // Hiển thị ngày trong EditText
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                     etDate.setText(sdf.format(selectedDate.getTime()));
                 },
@@ -112,18 +124,15 @@ public class AddExpenseFragment extends Fragment {
     }
 
     private void saveExpense() {
-        // Lấy dữ liệu từ các trường nhập liệu
         String description = etDescription.getText().toString().trim();
         String amountStr = etAmount.getText().toString().trim();
         int selectedCategoryPosition = spinnerCategory.getSelectedItemPosition();
 
-        // Kiểm tra dữ liệu đầu vào
         if (description.isEmpty() || amountStr.isEmpty() || etDate.getText().toString().isEmpty() || selectedCategoryPosition == -1) {
             Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Chuyển đổi dữ liệu
         double amount;
         try {
             amount = Double.parseDouble(amountStr);
@@ -132,10 +141,8 @@ public class AddExpenseFragment extends Fragment {
             return;
         }
 
-        // Lấy ngày từ selectedDate
         Date date = selectedDate.getTime();
 
-        // Lấy userID từ UserPreferences
         User currentUser = UserPreferences.getUser(requireContext());
         if (currentUser == null) {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
@@ -143,10 +150,8 @@ public class AddExpenseFragment extends Fragment {
         }
         int userId = currentUser.getUserID();
 
-        // Lấy categoryID từ danh mục được chọn
         int categoryId = categoryList.get(selectedCategoryPosition).getCategoryId();
 
-        // Tạo đối tượng Expense
         Expense expense = new Expense();
         expense.setUserID(userId);
         expense.setDescription(description);
@@ -154,10 +159,8 @@ public class AddExpenseFragment extends Fragment {
         expense.setDate(date);
         expense.setCategoryID(categoryId);
 
-        // Lưu vào cơ sở dữ liệu
         expenseRepository.addExpense(expense);
 
-        // Gửi kết quả để thông báo rằng chi tiêu đã được thêm
         Bundle result = new Bundle();
         result.putBoolean("expense_added", true);
         getParentFragmentManager().setFragmentResult("expense_added_request", result);
@@ -166,7 +169,6 @@ public class AddExpenseFragment extends Fragment {
         getParentFragmentManager().popBackStack();
     }
 
-    // Lớp phụ để lưu trữ thông tin danh mục
     public static class CategoryItem {
         private int categoryId;
         private String categoryName;
