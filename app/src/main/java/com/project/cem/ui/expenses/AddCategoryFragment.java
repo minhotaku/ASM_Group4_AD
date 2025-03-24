@@ -21,6 +21,8 @@ import com.project.cem.repository.ExpenseCategoryRepository;
 import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.utils.UserPreferences;
 
+import java.util.List;
+
 public class AddCategoryFragment extends Fragment {
 
     private EditText etCategoryName;
@@ -39,7 +41,7 @@ public class AddCategoryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SQLiteHelper dbHelper = new SQLiteHelper(requireContext());
-        categoryRepository = new ExpenseCategoryRepository(dbHelper); // Sử dụng constructor với SQLiteHelper
+        categoryRepository = new ExpenseCategoryRepository(dbHelper);
     }
 
     @Override
@@ -69,25 +71,37 @@ public class AddCategoryFragment extends Fragment {
             }
 
             User currentUser = UserPreferences.getUser(requireContext());
-            if (currentUser != null) {
-                int userId = currentUser.getUserID();
-
-                // Tạo đối tượng ExpenseCategory
-                ExpenseCategory newCategory = new ExpenseCategory();
-                newCategory.setCategoryName(categoryName);
-                newCategory.setUserID(userId);
-
-                // Thêm danh mục mới bằng phương thức insertExpenseCategory
-                categoryRepository.insertExpenseCategory(newCategory);
-
-                // Gửi kết quả về CategoryFragment để cập nhật danh sách
-                Bundle result = new Bundle();
-                result.putBoolean("category_added", true);
-                getParentFragmentManager().setFragmentResult("category_added_request", result);
-
-                // Quay lại CategoryFragment
-                getParentFragmentManager().popBackStack();
+            if (currentUser == null) {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            int userId = currentUser.getUserID();
+
+            // Kiểm tra xem tên danh mục đã tồn tại hay chưa
+            List<ExpenseCategory> existingCategories = categoryRepository.getAllCategories(userId);
+            boolean isCategoryExists = existingCategories.stream()
+                    .anyMatch(cat -> cat.getCategoryName().equalsIgnoreCase(categoryName));
+            if (isCategoryExists) {
+                Toast.makeText(getContext(), "Category already exists", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Tạo đối tượng ExpenseCategory
+            ExpenseCategory newCategory = new ExpenseCategory();
+            newCategory.setCategoryName(categoryName);
+            newCategory.setUserID(userId);
+
+            // Thêm danh mục mới
+            categoryRepository.insertExpenseCategory(newCategory);
+
+            // Gửi kết quả về CategoryFragment để cập nhật danh sách
+            Bundle result = new Bundle();
+            result.putBoolean("category_added", true);
+            getParentFragmentManager().setFragmentResult("category_added_request", result);
+
+            // Quay lại CategoryFragment
+            getParentFragmentManager().popBackStack();
         });
 
         return view;

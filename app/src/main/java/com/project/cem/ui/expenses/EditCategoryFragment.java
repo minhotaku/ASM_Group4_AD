@@ -19,6 +19,8 @@ import com.project.cem.model.ExpenseCategory;
 import com.project.cem.repository.ExpenseCategoryRepository;
 import com.project.cem.utils.SQLiteHelper;
 
+import java.util.List;
+
 public class EditCategoryFragment extends Fragment {
 
     private static final String ARG_CATEGORY_ID = "category_id";
@@ -91,6 +93,16 @@ public class EditCategoryFragment extends Fragment {
             String newCategoryName = etCategoryName.getText().toString().trim();
             if (newCategoryName.isEmpty()) {
                 Toast.makeText(getContext(), "Please enter a category name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Kiểm tra xem tên danh mục mới có trùng với danh mục khác hay không
+            List<ExpenseCategory> existingCategories = categoryRepository.getAllCategories(category.getUserID());
+            boolean isCategoryExists = existingCategories.stream()
+                    .anyMatch(cat -> cat.getCategoryName().equalsIgnoreCase(newCategoryName)
+                            && cat.getCategoryID() != category.getCategoryID());
+            if (isCategoryExists) {
+                Toast.makeText(getContext(), "Category already exists", Toast.LENGTH_SHORT).show();
                 return;
             }
 
