@@ -4,9 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,9 +19,6 @@ import com.project.cem.model.ExpenseCategory;
 import com.project.cem.repository.ExpenseCategoryRepository;
 import com.project.cem.utils.SQLiteHelper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class EditCategoryFragment extends Fragment {
 
     private static final String ARG_CATEGORY_ID = "category_id";
@@ -30,11 +26,9 @@ public class EditCategoryFragment extends Fragment {
     private static final String ARG_USER_ID = "user_id";
 
     private ExpenseCategory category;
-    private Spinner spinnerCategory;
+    private EditText etCategoryName;
     private Button btnSave;
     private ExpenseCategoryRepository categoryRepository;
-    private List<ExpenseCategory> allCategories; // Danh sách tất cả danh mục
-    private List<String> categoryNames; // Danh sách tên danh mục để hiển thị trong Spinner
 
     public EditCategoryFragment() {
         // Required empty public constructor
@@ -67,13 +61,6 @@ public class EditCategoryFragment extends Fragment {
             category.setCategoryName(categoryName);
             category.setUserID(userId);
         }
-
-        // Lấy danh sách tất cả danh mục
-        allCategories = categoryRepository.getAllCategories(category.getUserID());
-        categoryNames = new ArrayList<>();
-        for (ExpenseCategory cat : allCategories) {
-            categoryNames.add(cat.getCategoryName());
-        }
     }
 
     @Override
@@ -81,24 +68,12 @@ public class EditCategoryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_edit_category, container, false);
 
-        spinnerCategory = view.findViewById(R.id.spinnerCategory);
+        etCategoryName = view.findViewById(R.id.etCategoryName);
         btnSave = view.findViewById(R.id.btnSave);
 
-        // Thiết lập Spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                categoryNames
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
-
-        // Đặt danh mục hiện tại làm lựa chọn mặc định
+        // Hiển thị thông tin danh mục hiện tại
         if (category != null) {
-            int position = categoryNames.indexOf(category.getCategoryName());
-            if (position != -1) {
-                spinnerCategory.setSelection(position);
-            }
+            etCategoryName.setText(category.getCategoryName());
         }
 
         // Thiết lập Toolbar
@@ -113,15 +88,14 @@ public class EditCategoryFragment extends Fragment {
 
         // Xử lý sự kiện nhấn nút Save
         btnSave.setOnClickListener(v -> {
-            String selectedCategoryName = spinnerCategory.getSelectedItem().toString();
-            if (selectedCategoryName.equals(category.getCategoryName())) {
-                Toast.makeText(getContext(), "No changes made", Toast.LENGTH_SHORT).show();
-                getParentFragmentManager().popBackStack();
+            String newCategoryName = etCategoryName.getText().toString().trim();
+            if (newCategoryName.isEmpty()) {
+                Toast.makeText(getContext(), "Please enter a category name", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Cập nhật danh mục
-            category.setCategoryName(selectedCategoryName);
+            category.setCategoryName(newCategoryName);
             categoryRepository.updateExpenseCategory(category);
 
             // Gửi kết quả về CategoryFragment

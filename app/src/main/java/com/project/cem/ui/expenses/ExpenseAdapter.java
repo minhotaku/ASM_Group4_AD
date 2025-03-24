@@ -20,6 +20,7 @@ import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.viewmodel.ExpenseViewModel;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +111,11 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
         }
 
         public void bind(Expense expense) {
-            // Định dạng amount với phân cách phần nghìn và thêm "VNĐ"
-            DecimalFormat decimalFormat = new DecimalFormat("#,###");
+            // Định dạng amount với dấu chấm làm phân cách phần nghìn và không hiển thị phần thập phân
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+            symbols.setGroupingSeparator('.'); // Sử dụng dấu chấm làm phân cách phần nghìn
+            DecimalFormat decimalFormat = new DecimalFormat("#,###", symbols);
+            decimalFormat.setMaximumFractionDigits(0); // Không hiển thị phần thập phân
             String formattedAmount = decimalFormat.format(expense.getAmount()) + " VNĐ";
             tvAmount.setText(formattedAmount);
 

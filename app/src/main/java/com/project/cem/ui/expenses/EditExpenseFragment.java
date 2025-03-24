@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,6 +25,7 @@ import com.project.cem.utils.SQLiteHelper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -33,12 +36,14 @@ public class EditExpenseFragment extends Fragment {
 
     private Expense expense;
     private EditText etAmount;
-    private EditText etCategory;
+    private Spinner spinnerCategory;
     private EditText etDescription;
     private EditText etDate;
     private Button btnSave;
     private ExpenseRepository expenseRepository;
     private ExpenseCategoryRepository categoryRepository;
+    private List<ExpenseCategory> allCategories; // Danh sách tất cả danh mục
+    private List<String> categoryNames; // Danh sách tên danh mục để hiển thị trong Spinner
 
     public EditExpenseFragment() {
         // Required empty public constructor
@@ -73,6 +78,13 @@ public class EditExpenseFragment extends Fragment {
             expense.setCategoryID(getArguments().getInt("category_id"));
             expense.setUserID(getArguments().getInt("user_id"));
         }
+
+        // Lấy danh sách tất cả danh mục
+        allCategories = categoryRepository.getAllCategories(expense.getUserID());
+        categoryNames = new ArrayList<>();
+        for (ExpenseCategory cat : allCategories) {
+            categoryNames.add(cat.getCategoryName());
+        }
     }
 
     @Override
@@ -81,20 +93,35 @@ public class EditExpenseFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_edit_expense, container, false);
 
         etAmount = view.findViewById(R.id.etAmount);
-        etCategory = view.findViewById(R.id.etCategory);
+        spinnerCategory = view.findViewById(R.id.spinnerCategory);
         etDescription = view.findViewById(R.id.etDescription);
         etDate = view.findViewById(R.id.etDate);
         btnSave = view.findViewById(R.id.btnSave);
 
+        // Thiết lập Spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                categoryNames
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(adapter);
+
         // Hiển thị thông tin chi tiêu hiện tại
         if (expense != null) {
             etAmount.setText(String.format(Locale.getDefault(), "%.2f", expense.getAmount()));
-            // Lấy categoryName từ categoryID
-            String categoryName = categoryRepository.getCategoryNameById(expense.getCategoryID());
-            etCategory.setText(categoryName != null ? categoryName : "Unknown Category");
             etDescription.setText(expense.getDescription() != null ? expense.getDescription() : "");
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             etDate.setText(dateFormat.format(expense.getDate()));
+
+            // Đặt danh mục hiện tại làm lựa chọn mặc định trong Spinner
+            String currentCategoryName = categoryRepository.getCategoryNameById(expense.getCategoryID());
+            if (currentCategoryName != null) {
+                int position = categoryNames.indexOf(currentCategoryName);
+                if (position != -1) {
+                    spinnerCategory.setSelection(position);
+                }
+            }
         }
 
         // Thiết lập Toolbar
@@ -110,11 +137,11 @@ public class EditExpenseFragment extends Fragment {
         // Xử lý sự kiện nhấn nút Save
         btnSave.setOnClickListener(v -> {
             String amountStr = etAmount.getText().toString().trim();
-            String categoryName = etCategory.getText().toString().trim();
+            int selectedCategoryPosition = spinnerCategory.getSelectedItemPosition();
             String description = etDescription.getText().toString().trim();
             String dateStr = etDate.getText().toString().trim();
 
-            if (amountStr.isEmpty() || categoryName.isEmpty() || dateStr.isEmpty()) {
+            if (amountStr.isEmpty() || selectedCategoryPosition == -1 || dateStr.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all required fields", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -124,12 +151,8 @@ public class EditExpenseFragment extends Fragment {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 Date date = dateFormat.parse(dateStr);
 
-                // Tìm categoryID từ categoryName
-                int categoryId = findCategoryIdByName(categoryName, expense.getUserID());
-                if (categoryId == -1) {
-                    Toast.makeText(getContext(), "Category not found", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                // Lấy categoryID từ danh mục được chọn
+                int categoryId = allCategories.get(selectedCategoryPosition).getCategoryID();
 
                 // Cập nhật chi tiêu
                 expense.setAmount(amount);
@@ -153,16 +176,5 @@ public class EditExpenseFragment extends Fragment {
         });
 
         return view;
-    }
-
-    // Phương thức để tìm categoryID từ categoryName
-    private int findCategoryIdByName(String categoryName, int userId) {
-        List<ExpenseCategory> categories = categoryRepository.getAllCategories(userId);
-        for (ExpenseCategory category : categories) {
-            if (category.getCategoryName().equalsIgnoreCase(categoryName)) {
-                return category.getCategoryID();
-            }
-        }
-        return -1; // Trả về -1 nếu không tìm thấy
     }
 }

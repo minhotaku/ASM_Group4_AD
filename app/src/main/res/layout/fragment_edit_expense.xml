@@ -3,16 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:fitsSystemWindows="true">  <!-- Thêm thuộc tính này -->
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/teal_200"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
+    <!-- Description -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -51,12 +53,10 @@
         android:textSize="16sp"
         android:layout_marginTop="16dp" />
 
-    <EditText
-        android:id="@+id/etCategory"
+    <Spinner
+        android:id="@+id/spinnerCategory"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:hint="Enter category" />
+        android:layout_height="wrap_content" />
 
     <!-- Date -->
     <TextView
@@ -80,6 +80,8 @@
         android:layout_height="wrap_content"
         android:text="Save"
         android:layout_gravity="center"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/teal_200"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>
