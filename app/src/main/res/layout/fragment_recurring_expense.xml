@@ -1,14 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F9FC"
     tools:context=".ui.setting.recurring.RecurringExpenseFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="104dp"
+        android:background="@color/blue"
+        android:gravity="center|left"
+        android:padding="16dp"
+        android:text="Recurring Expense"
+        android:textColor="@android:color/white"
+        android:textSize="28sp"
+        android:textStyle="bold" />
 
-</FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recurring_expense_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        />
+
+    <ImageView
+        android:id="@+id/btn_add_recurring_expense"
+        android:layout_width="62dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:src="@drawable/freesample_vectorizer_io_plus_10023858" />
+
+</LinearLayout>

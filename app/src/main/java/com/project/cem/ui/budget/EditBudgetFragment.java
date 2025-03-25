@@ -24,6 +24,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.project.cem.R;
 import com.project.cem.model.Budget;
 import com.project.cem.model.ExpenseCategory;
+import com.project.cem.utils.DateUtils;
+import com.project.cem.utils.VndCurrencyFormatter;
 import com.project.cem.viewmodel.BudgetViewModel;
 
 import java.text.DecimalFormat;
@@ -41,13 +43,13 @@ public class EditBudgetFragment extends Fragment {
     private BudgetViewModel budgetViewModel;
     private Spinner spnCategory;
     private EditText edtAmount;
-    private NumberPicker monthPicker; // Use NumberPicker
-    private NumberPicker yearPicker;  // Use NumberPicker
+    private NumberPicker monthPicker;
+    private NumberPicker yearPicker;
     private Button btnUpdate;
-    private Button btnCancel;
     private int budgetId;
     private List<ExpenseCategory> categoriesList = new ArrayList<>();
-    private final DecimalFormat decimalFormat = new DecimalFormat("#,###"); // Format for display
+    // Use VndCurrencyFormatter
+    private VndCurrencyFormatter currencyFormatter = new VndCurrencyFormatter();
     private String current = "";
 
     public static EditBudgetFragment newInstance(int budgetId) {
@@ -73,14 +75,13 @@ public class EditBudgetFragment extends Fragment {
 
         spnCategory = view.findViewById(R.id.edit_spn_category);
         edtAmount = view.findViewById(R.id.edit_edt_amount);
-        // Initialize NumberPickers
+        edtAmount.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         monthPicker = view.findViewById(R.id.edit_np_month);
         yearPicker = view.findViewById(R.id.edit_np_year);
         btnUpdate = view.findViewById(R.id.edit_btn_update);
-        btnCancel = view.findViewById(R.id.edit_btn_cancel);
 
-        // Set up NumberPickers
-        setupNumberPickers();
+        // Use DateUtils to set up the NumberPickers
+        DateUtils.setupMonthAndYearPickers(monthPicker, yearPicker, -10, 10);
 
 
         budgetViewModel = new ViewModelProvider(requireActivity()).get(BudgetViewModel.class);
@@ -96,22 +97,26 @@ public class EditBudgetFragment extends Fragment {
             loadBudgetInfo();
         });
 
-
         btnUpdate.setOnClickListener(v -> updateBudget());
-        edtAmount.addTextChangedListener(onTextChangedListener());
+        setupAmountEditText(); // Set up TextWatcher
 
-        btnCancel.setOnClickListener(v -> showCancelConfirmationDialog());
-
-        budgetViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage -> {
-            if (errorMessage != null && !errorMessage.isEmpty()) {
+        budgetViewModel.getErrorMessage().observe(getViewLifecycleOwner(), errorMessage ->{
+            if(errorMessage!= null && !errorMessage.isEmpty()){
                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show();
             }
         });
-
+        budgetViewModel.getMessageLiveData().observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                budgetViewModel.clearMessage(); // Clear the message after displaying it
+            }
+        });
         return view;
     }
-    private TextWatcher onTextChangedListener() {
-        return new TextWatcher() {
+
+    private void setupAmountEditText() {
+        edtAmount.addTextChangedListener(new TextWatcher() {
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -120,44 +125,31 @@ public class EditBudgetFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                edtAmount.removeTextChangedListener(this);
-                try {
-                    String originalString = s.toString();
-                    Long longval;
-                    if (originalString.contains(",")) {
-                        originalString = originalString.replaceAll(",", "");
-                    }
-                    if (originalString.contains(".")) {
-                        originalString = originalString.replaceAll("\\.", "");
-                    }
-                    longval = Long.parseLong(originalString);
+                if (!s.toString().equals(current)) {
+                    edtAmount.removeTextChangedListener(this);
 
-                    DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.US);
-                    formatter.applyPattern("#,###,###,###");
-                    String formattedString = formatter.format(longval);
+                    String cleanString = s.toString().replaceAll("[^\\d]", ""); // Remove
+                    if (!cleanString.isEmpty()) {
+                        try {
+                            long parsed = Long.parseLong(cleanString);
+                            String formatted = currencyFormatter.formatForEditText(parsed); // Dùng hàm mới
 
-                    edtAmount.setText(formattedString);
-                    edtAmount.setSelection(edtAmount.getText().length());
-                } catch (NumberFormatException nfe) {
-                    nfe.printStackTrace();
+                            current = formatted;
+                            edtAmount.setText(formatted);
+                            edtAmount.setSelection(formatted.length());
+
+                        } catch (NumberFormatException e) {
+                            // Handle
+                            Log.e("EditBudgetFragment", "Error parsing amount", e);
+                        }
+                    }
+                    else{
+                        current = "";
+                    }
+                    edtAmount.addTextChangedListener(this); // Re-attach
                 }
-                edtAmount.addTextChangedListener(this);
             }
-        };
-    }
-    private void setupNumberPickers() {
-        // Month NumberPicker
-        String[] months = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-        monthPicker.setMinValue(1);
-        monthPicker.setMaxValue(12);
-        monthPicker.setDisplayedValues(months); // Display month names
-
-
-        // Year NumberPicker
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        yearPicker.setMinValue(currentYear - 10); // Go back 10 years
-        yearPicker.setMaxValue(currentYear + 10); // Go forward 10 years
-
+        });
     }
 
 
@@ -165,8 +157,8 @@ public class EditBudgetFragment extends Fragment {
         Budget budget = budgetViewModel.getAllBudgets().getValue().stream().filter(x -> x.getBudgetID() == budgetId).findFirst().orElse(null);
 
         if (budget != null) {
-            edtAmount.setText(decimalFormat.format(budget.getAmount()));
-            // Set month and year on NumberPickers
+            // Dùng hàm formatForEditText
+            edtAmount.setText(currencyFormatter.formatForEditText(budget.getAmount()));
             monthPicker.setValue(budget.getMonth());
             yearPicker.setValue(budget.getYear());
 
@@ -182,21 +174,24 @@ public class EditBudgetFragment extends Fragment {
     }
 
     private void updateBudget() {
+        // Lấy và kiểm tra dữ liệu đầu vào
         String amountStr = edtAmount.getText().toString().trim();
 
         if (spnCategory.getSelectedItem() == null || amountStr.isEmpty()) {
             Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
-        String cleanString = amountStr.replaceAll("[$,.]", "");
-        double amount;
+        // Remove  dots before parsing
+        String cleanString = amountStr.replace("VNĐ", "").replaceAll("[^\\d]", "");
+        long amount;
         try {
-            amount = Double.parseDouble(cleanString);
-        } catch (NumberFormatException e) {
-            Toast.makeText(getContext(), "Invalid amount format.", Toast.LENGTH_SHORT).show();
+            amount = Long.parseLong(cleanString);
+        }
+        catch(NumberFormatException e){
+            Toast.makeText(getContext(), "Invalid amount format", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        // Minimum amount check
         if (amount < 10000) {
             Toast.makeText(getContext(), "Minimum budget amount is 10,000 VND", Toast.LENGTH_SHORT).show();
             return;
@@ -208,27 +203,24 @@ public class EditBudgetFragment extends Fragment {
         int month = monthPicker.getValue();
         int year = yearPicker.getValue();
 
-
+        // Lấy User
         com.project.cem.model.User user = com.project.cem.utils.UserPreferences.getUser(getContext());
         if (user == null) {
+            Log.e("EditBudgetFragment", "User is null. Cannot update budget.");
             Toast.makeText(getContext(), "User is null. Cannot update budget.", Toast.LENGTH_SHORT).show();
             return;
         }
         int userID = user.getUserID();
 
-        Budget updatedBudget = new Budget(budgetId, userID, categoryId, amount, month, year); // Use new constructor
+        // Tạo Budget object
+        Budget updatedBudget = new Budget(budgetId, userID, categoryId, amount, month, year);
+
+        // Gọi update trên ViewModel
         budgetViewModel.update(updatedBudget);
+
+        // Pop back stack (quay lại BudgetFragment)
         requireActivity().getSupportFragmentManager().popBackStack();
-    }
 
-
-    private void showCancelConfirmationDialog() {
-        new AlertDialog.Builder(getContext())
-                .setTitle("Cancel Update")
-                .setMessage("Are you sure you want to cancel the update?")
-                .setPositiveButton("Yes", (dialog, which) -> requireActivity().getSupportFragmentManager().popBackStack())
-                .setNegativeButton("No", null)
-                .show();
     }
 
     private List<String> getCategoryNames(List<ExpenseCategory> categories) {
@@ -238,7 +230,6 @@ public class EditBudgetFragment extends Fragment {
         }
         return names;
     }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();

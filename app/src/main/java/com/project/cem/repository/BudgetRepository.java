@@ -23,7 +23,6 @@ public class BudgetRepository {
 
     private final SQLiteHelper dbHelper;
     private final Context context;
-    // No longer needed: private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     public BudgetRepository(Context context) {
         this.context = context;
@@ -42,14 +41,13 @@ public class BudgetRepository {
         ContentValues values = new ContentValues();
         values.put("categoryID", budget.getCategoryID());
         values.put("amount", budget.getAmount());
-        values.put("month", budget.getMonth()); // Use month
-        values.put("year", budget.getYear());   // Use year
+        values.put("month", budget.getMonth());
+        values.put("year", budget.getYear());
         values.put("userID", budget.getUserID());
 
         long newRowId = db.insert(SQLiteHelper.TABLE_BUDGET, null, values);
         return newRowId != -1;
     }
-
     public List<Budget> getAllBudgets(SQLiteDatabase db) {
         List<Budget> budgetList = new ArrayList<>();
         com.project.cem.model.User user = UserPreferences.getUser(context);
@@ -70,8 +68,8 @@ public class BudgetRepository {
                 int budgetId = cursor.getInt(cursor.getColumnIndexOrThrow("budgetID"));
                 int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
                 double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
-                int month = cursor.getInt(cursor.getColumnIndexOrThrow("month")); // Get month
-                int year = cursor.getInt(cursor.getColumnIndexOrThrow("year"));   // Get year
+                int month = cursor.getInt(cursor.getColumnIndexOrThrow("month"));
+                int year = cursor.getInt(cursor.getColumnIndexOrThrow("year"));
                 String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("categoryName"));
 
                 Budget budget = new Budget(budgetId, userId, categoryId, amount, month, year);
@@ -82,27 +80,29 @@ public class BudgetRepository {
         return budgetList;
     }
 
+
     public int update(SQLiteDatabase db, Budget budget) {
         ContentValues values = new ContentValues();
         values.put("categoryID", budget.getCategoryID());
         values.put("amount", budget.getAmount());
-        values.put("month", budget.getMonth()); // Use month
-        values.put("year", budget.getYear());   // Use year
+        values.put("month", budget.getMonth());
+        values.put("year", budget.getYear());
         values.put("userID", budget.getUserID());
 
         String selection = "budgetID = ?";
         String[] selectionArgs = {String.valueOf(budget.getBudgetID())};
 
         return db.update(SQLiteHelper.TABLE_BUDGET, values, selection, selectionArgs);
+
     }
 
     public List<ExpenseCategory> getAllCategories(SQLiteDatabase db) {
         List<ExpenseCategory> categories = new ArrayList<>();
         com.project.cem.model.User user = UserPreferences.getUser(context);
-        if (user == null) {
-            return categories;
+        if(user == null){
+            return  categories;
         }
-        String query = "SELECT categoryID, categoryName, userID FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " WHERE userID = ?";
+        String query = "SELECT categoryID, categoryName, userID FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY+ " WHERE userID = ?";
 
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(user.getUserID())});
 
@@ -125,7 +125,7 @@ public class BudgetRepository {
 
         // Create a Calendar object for the given month and year
         Calendar calendar = Calendar.getInstance();
-        calendar.clear(); // Clear all fields, including time fields
+        calendar.clear();
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month - 1); // Month is 0-indexed (January = 0)
         calendar.set(Calendar.DAY_OF_MONTH, 1); // Set to the first day of the month
@@ -155,29 +155,4 @@ public class BudgetRepository {
 
         return totalExpenses;
     }
-    public List<Budget> getBudgetsByCategoryAndUser(SQLiteDatabase db, int userId, int categoryId) {
-        List<Budget> budgetList = new ArrayList<>();
-        String query = "SELECT * FROM " + SQLiteHelper.TABLE_BUDGET +
-                " WHERE userID = ? AND categoryID = ?";
-
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId), String.valueOf(categoryId)});
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                int budgetId = cursor.getInt(cursor.getColumnIndexOrThrow("budgetID"));
-                int returnCategoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
-                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
-                int month = cursor.getInt(cursor.getColumnIndexOrThrow("month")); // Get month
-                int year = cursor.getInt(cursor.getColumnIndexOrThrow("year"));   // Get year
-
-                Budget budget = new Budget(budgetId, userId, returnCategoryId, amount, month, year);
-                budgetList.add(budget);
-
-            } while (cursor.moveToNext());
-            cursor.close();
-
-        }
-
-        return budgetList;
-    }
-
 }

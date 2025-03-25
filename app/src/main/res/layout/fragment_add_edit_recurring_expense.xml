@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:background="#F5F9FC"
-    tools:context=".ui.budget.EditBudgetFragment">
+    tools:context=".ui.setting.recurring.AddEditRecurringExpenseFragment">
 
     <TextView
         android:layout_width="match_parent"
@@ -15,20 +15,22 @@
         android:layout_marginLeft="10sp"
         android:layout_marginBottom="16dp"
         android:fontFamily="casual"
-        android:text="Edit Budget"
+        android:text="Recurring Expense"
         android:textColor="@color/pink"
         android:textSize="30sp"
         android:textStyle="bold" />
 
-    <Spinner
-        android:id="@+id/edit_spn_category"
+    <EditText
+        android:id="@+id/edt_recurring_description"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
+        android:hint="Description"
         android:layout_marginBottom="8dp"
-        android:contentDescription="Select Category" />
+        android:autofillHints="description"
+        android:minHeight="48dp"/>
 
     <EditText
-        android:id="@+id/edit_edt_amount"
+        android:id="@+id/edt_recurring_amount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="0 VNĐ"
@@ -37,6 +39,12 @@
         android:autofillHints="amount"
         android:minHeight="48dp"/>
 
+    <Spinner
+        android:id="@+id/spn_recurring_category"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="Select Category" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,29 +52,42 @@
         android:layout_marginBottom="8dp">
 
         <NumberPicker
-            android:id="@+id/edit_np_month"
+            android:id="@+id/np_recurring_month"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"/>
 
         <NumberPicker
-            android:id="@+id/edit_np_year"
+            android:id="@+id/np_recurring_year"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content" />
-
     </LinearLayout>
 
+    <Spinner
+        android:id="@+id/spn_recurring_frequency"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:entries="@array/recurrence_frequencies"/>
+
+    <Switch
+        android:id="@+id/sw_recurring_active"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Active"
+        android:layout_marginBottom="8dp"/>
+
+
     <Button
-        android:id="@+id/edit_btn_update"
+        android:id="@+id/btn_recurring_save"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginEnd="10dp"
         android:background="@drawable/btn_custom"
         app:backgroundTint="@null"
-        android:text="Update" />
-
+        android:text="Save" />
 
 </LinearLayout>

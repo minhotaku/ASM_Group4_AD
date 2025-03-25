@@ -29,6 +29,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".utils.BudgetBroadcastReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.project.cem.ACTION_CHECK_BUDGET" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -20,4 +20,9 @@ public class VndCurrencyFormatter {
     public String format(double amount) {
         return formatter.format(amount) + " VNĐ";
     }
+
+    // Hàm format nhưng không thêm " VNĐ" ở EditText
+    public String formatForEditText(double amount) {
+        return formatter.format(amount);
+    }
 }

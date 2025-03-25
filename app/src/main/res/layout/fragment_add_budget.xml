@@ -7,16 +7,18 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical"
     android:padding="16dp"
+    android:background="#F5F9FC"
     tools:context=".ui.budget.AddBudgetFragment">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10sp"
         android:layout_marginBottom="16dp"
+        android:fontFamily="casual"
         android:text="Add Budget"
-        android:layout_marginTop="12dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
+        android:textColor="@color/pink"
+        android:textSize="30sp"
         android:textStyle="bold" />
 
     <Spinner
@@ -32,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:autofillHints="amount"
-        android:hint="Amount"
+        android:hint="O VNĐ"
         android:inputType="number"
         android:minHeight="48dp" />
 

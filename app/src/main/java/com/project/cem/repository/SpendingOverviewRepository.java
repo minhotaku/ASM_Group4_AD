@@ -10,6 +10,7 @@ import com.project.cem.utils.SQLiteHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SpendingOverviewRepository {
     private final SQLiteHelper dbHelper;
@@ -37,7 +38,7 @@ public class SpendingOverviewRepository {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
-            // SQL query to get spending by category for a specific month and year
+            // SQL query to get spending by category
             String query = "SELECT ec.categoryID, ec.categoryName, SUM(e.amount) as totalAmount " +
                     "FROM " + SQLiteHelper.TABLE_EXPENSE + " e " +
                     "JOIN " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " ec ON e.categoryID = ec.categoryID " +
@@ -63,7 +64,7 @@ public class SpendingOverviewRepository {
 
                     CategorySpending categorySpending = new CategorySpending(categoryId, categoryName, amount);
 
-                    // Assign a color from our predefined color array
+                    // Assign a color
                     categorySpending.setColorCode(CHART_COLORS[colorIndex % CHART_COLORS.length]);
                     colorIndex++;
 
@@ -82,7 +83,7 @@ public class SpendingOverviewRepository {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
-            // SQL query to get recurring expenses for a specific month and year
+            // SQL query to get recurring expenses (Not used in budget calculation)
             String query = "SELECT ec.categoryID, ec.categoryName, re.amount " +
                     "FROM " + SQLiteHelper.TABLE_RECURRING_EXPENSE + " re " +
                     "JOIN " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " ec ON re.categoryID = ec.categoryID " +
@@ -104,8 +105,6 @@ public class SpendingOverviewRepository {
                     double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("amount"));
 
                     CategorySpending categorySpending = new CategorySpending(categoryId, categoryName, amount);
-
-                    // Assign a color from our predefined color array
                     categorySpending.setColorCode(CHART_COLORS[colorIndex % CHART_COLORS.length]);
                     colorIndex++;
 
@@ -118,13 +117,46 @@ public class SpendingOverviewRepository {
 
         return result;
     }
+    // Combine all expense
+    public double getTotalExpensesForCategory(SQLiteDatabase db, int userId, int categoryId, int month, int year) {
+        double totalExpenses = 0;
+
+        // 1. Regular expenses (for the specific month and year)
+        String regularExpenseQuery = "SELECT SUM(amount) FROM " + SQLiteHelper.TABLE_EXPENSE +
+                " WHERE userID = ? AND categoryID = ? AND strftime('%Y-%m', date) = ?";
+        String yearMonth = String.format(Locale.getDefault(), "%04d-%02d", year, month);
+        Cursor regularCursor = db.rawQuery(regularExpenseQuery, new String[]{String.valueOf(userId), String.valueOf(categoryId), yearMonth});
+        if (regularCursor != null && regularCursor.moveToFirst()) {
+            totalExpenses += regularCursor.getDouble(0);
+            regularCursor.close();
+        }
+
+        // 2. Recurring expenses (CORRECTED LOGIC)
+        String recurringExpenseQuery = "SELECT SUM(amount) FROM " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
+                " WHERE userID = ? AND categoryID = ? AND isActive = 1 " +
+                " AND ((recurrenceFrequency = 'Month' AND year*12+month <= ?) " + // Before or equal to the budget's month/year
+                " OR (recurrenceFrequency = 'Year' AND year <= ?))";  // Before or equal to the budget year
+
+        Cursor recurringCursor = db.rawQuery(recurringExpenseQuery, new String[]{
+                String.valueOf(userId),
+                String.valueOf(categoryId),
+                String.valueOf(year * 12 + month),
+                String.valueOf(year)
+        });
+        if (recurringCursor != null && recurringCursor.moveToFirst()) {
+            totalExpenses += recurringCursor.getDouble(0);
+            recurringCursor.close();
+        }
+
+        return totalExpenses;
+    }
 
     public double getTotalBudgetForMonth(long userId, int month, int year) {
         double totalBudget = 0;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
-            // SQL query to get the total budget for a specific month and year
+            // SQL query
             String query = "SELECT SUM(amount) as totalBudget " +
                     "FROM " + SQLiteHelper.TABLE_BUDGET + " " +
                     "WHERE userID = ? AND month = ? AND year = ?";
@@ -150,12 +182,12 @@ public class SpendingOverviewRepository {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
-            // SQL query to get recurring expenses for a specific month and year where the frequency is monthly
+            // SQL query (Not used in budget calculation)
             String query = "SELECT SUM(amount) as recurringExpense " +
                     "FROM " + SQLiteHelper.TABLE_RECURRING_EXPENSE + " " +
                     "WHERE userID = ? " +
-                    "AND recurrenceFrequency = 'Month' " + // Filter by recurrence frequency being "Month"
-                    "AND ((month = ? AND year = ?) OR (recurrenceFrequency = 'Month'))";  // Include any monthly recurrence
+                    "AND recurrenceFrequency = 'Month' " +
+                    "AND ((month = ? AND year = ?) OR (recurrenceFrequency = 'Month'))";
 
             try (Cursor cursor = db.rawQuery(query, new String[]{
                     String.valueOf(userId),
@@ -171,6 +203,14 @@ public class SpendingOverviewRepository {
         }
 
         return recurringExpense;
+    }
+
+    // Phương thức này CHỈ DÀNH CHO BudgetBroadcastReceiver
+    public SQLiteDatabase getDbForBroadcastReceiver() {
+        return dbHelper.getReadableDatabase();
+    }
+    public void closeDbForBroadcastReceiver(){
+        dbHelper.close();
     }
 
 }
