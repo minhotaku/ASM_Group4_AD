@@ -1,4 +1,4 @@
-package com.project.cem.ui.expenses;
+package com.project.cem.ui.expense;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,10 +24,8 @@ import com.project.cem.R;
 import com.project.cem.model.User;
 import com.project.cem.utils.SQLiteHelper;
 import com.project.cem.utils.UserPreferences;
-import com.project.cem.viewmodel.ExpenseViewModel;
-import com.project.cem.repository.ExpenseRepository;
 
-public class ExpensesFragment extends Fragment {
+public class ExpenseFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -40,12 +38,12 @@ public class ExpensesFragment extends Fragment {
     private RecyclerView recyclerView;
     private int userId;
 
-    public ExpensesFragment() {
+    public ExpenseFragment() {
         // Required empty public constructor
     }
 
-    public static ExpensesFragment newInstance(String param1, String param2) {
-        ExpensesFragment fragment = new ExpensesFragment();
+    public static ExpenseFragment newInstance(String param1, String param2) {
+        ExpenseFragment fragment = new ExpenseFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
