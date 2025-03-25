@@ -233,7 +233,6 @@ public class ExpenseFragment extends Fragment {
 
                 @Override
                 public void onExpenseUpdated(com.project.cem.model.Expense expense) {
-                    // Không cần xử lý khi thêm mới
                 }
             });
 
@@ -250,7 +249,6 @@ public class ExpenseFragment extends Fragment {
             dialogFragment.setExpenseDialogListener(new ExpenseDialogFragment.ExpenseDialogListener() {
                 @Override
                 public void onExpenseAdded(com.project.cem.model.Expense expense) {
-                    // Không cần xử lý khi cập nhật
                 }
 
                 @Override

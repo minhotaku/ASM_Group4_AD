@@ -85,7 +85,7 @@ public class ExpenseCategoryFragment extends Fragment {
             @Override
             public void onCategoryEditClick(int categoryID, String currentName) {
                 showEditCategoryDialog(categoryID, currentName);
-                viewModel.clearError();
+                viewModel.clearError(); // Xóa lỗi khi mở dialog
             }
 
             @Override
@@ -219,7 +219,7 @@ public class ExpenseCategoryFragment extends Fragment {
             }
         });
 
-        // Hiển thị dialog
+
         dialog.show();
 
         // Ghi đè xử lý nút Lưu để không đóng dialog khi có lỗi
@@ -249,17 +249,17 @@ public class ExpenseCategoryFragment extends Fragment {
                 try {
                     viewModel.getOperationSuccess().removeObserver(observers.successObserver);
                 } catch (Exception e) {
-                    // Ngăn chặn lỗi khi observer đã bị remove hoặc Fragment không còn hợp lệ
+
                 }
             }
             if (observers.errorObserver != null && isAdded() && !isRemoving() && !isDetached()) {
                 try {
                     viewModel.getErrorMessage().removeObserver(observers.errorObserver);
                 } catch (Exception e) {
-                    // Ngăn chặn lỗi khi observer đã bị remove hoặc Fragment không còn hợp lệ
+
                 }
             }
-            // Xóa khỏi map
+
             dialogObserversMap.remove(dialogId);
         }
     }

@@ -50,12 +50,11 @@ public class ExpenseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private void processGroupedData() {
         items.clear();
 
-        // Map đã được sắp xếp từ ViewModel, chỉ cần chuyển đổi thành list
         for (Map.Entry<String, List<ExpenseWithCategory>> entry : groupedExpenses.entrySet()) {
             // Thêm header tháng
             items.add(entry.getKey());
 
-            // Thêm các chi tiêu - đảm bảo chi tiêu trong mỗi nhóm được sắp xếp theo ngày
+            // mỗi nhóm được sắp xếp theo ngày
             List<ExpenseWithCategory> expensesInMonth = entry.getValue();
             items.addAll(expensesInMonth);
         }
@@ -92,7 +91,6 @@ public class ExpenseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             expenseHolder.dateTextView.setText(dateFormat.format(expense.getDate()));
             expenseHolder.amountTextView.setText(currencyFormatter.format(expense.getAmount()));
 
-            // Sử dụng Chip cho danh mục
             expenseHolder.categoryChip.setText(expense.getCategoryName());
 
             expenseHolder.itemView.setOnLongClickListener(v -> {

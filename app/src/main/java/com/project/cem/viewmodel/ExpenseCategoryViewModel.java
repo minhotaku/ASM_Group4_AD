@@ -163,7 +163,6 @@ public class ExpenseCategoryViewModel extends AndroidViewModel {
                     return;
                 }
 
-                // Cập nhật tên danh mục
                 category.setCategoryName(category.getCategoryName().trim());
                 int result = categoryRepository.updateCategory(category);
 

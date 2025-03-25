@@ -91,7 +91,6 @@ public class ExpenseDialogFragment extends DialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_expense, null);
 
-        // Initialize Views
         descriptionLayout = view.findViewById(R.id.description_layout);
         amountLayout = view.findViewById(R.id.amount_layout);
         descriptionEditText = view.findViewById(R.id.edit_description);
@@ -102,19 +101,14 @@ public class ExpenseDialogFragment extends DialogFragment {
         saveButton = view.findViewById(R.id.button_save);
         cancelButton = view.findViewById(R.id.button_cancel);
 
-        // Setup category spinner
         setupCategorySpinner();
 
-        // Setup TextWatcher for amount formatting
         amountEditText.addTextChangedListener(amountTextWatcher());
 
-        // Set default date
         updateDateDisplay();
 
-        // Date picker click listener
         dateButton.setOnClickListener(v -> showDatePicker());
 
-        // Populate fields if editing
         if (expenseToEdit != null) {
             descriptionEditText.setText(expenseToEdit.getDescription());
             String formattedAmount = decimalFormat.format((long) expenseToEdit.getAmount());
@@ -135,7 +129,6 @@ public class ExpenseDialogFragment extends DialogFragment {
             }
         }
 
-        // Save button listener
         saveButton.setOnClickListener(v -> {
             if (validateInput()) {
                 saveExpense();
@@ -143,7 +136,6 @@ public class ExpenseDialogFragment extends DialogFragment {
             }
         });
 
-        // Cancel button listener
         cancelButton.setOnClickListener(v -> dismiss());
 
         builder.setView(view);
@@ -181,7 +173,6 @@ public class ExpenseDialogFragment extends DialogFragment {
                     amountEditText.setText(formattedString);
                     amountEditText.setSelection(formattedString.length());
                 } catch (NumberFormatException e) {
-                    // Handle invalid input silently or show error if needed
                 }
                 amountEditText.addTextChangedListener(this);
             }
