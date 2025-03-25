@@ -10,9 +10,9 @@ import androidx.fragment.app.FragmentTransaction;
 import com.project.cem.R;
 import com.project.cem.databinding.ActivityStudentHomeBinding;
 import com.project.cem.ui.budget.BudgetFragment;
-import com.project.cem.ui.expenses.ExpensesFragment;
 import com.project.cem.ui.home.HomeFragment;
 import com.project.cem.ui.setting.SettingFragment;
+import com.project.cem.ui.expense.ExpenseFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
                     replaceFragment(new HomeFragment());
                     break;
                 case R.id.expenses:
-                    replaceFragment(new ExpensesFragment());
+                    replaceFragment(new ExpenseFragment());
                     break;
                 case R.id.budget:
                     replaceFragment(new BudgetFragment());
