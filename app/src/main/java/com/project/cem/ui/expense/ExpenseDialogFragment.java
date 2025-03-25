@@ -23,9 +23,9 @@ import com.project.cem.model.Expense;
 import com.project.cem.model.ExpenseCategory;
 import com.project.cem.model.ExpenseWithCategory;
 import com.project.cem.utils.UserPreferences;
-import com.project.cem.utils.VndCurrencyFormatter;
 
-import java.text.ParseException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -48,13 +48,10 @@ public class ExpenseDialogFragment extends DialogFragment {
 
     private List<ExpenseCategory> categories;
     private Expense expenseToEdit;
-    private String categoryName; // Để lưu trữ tạm tên danh mục khi chỉnh sửa
+    private String categoryName;
     private Calendar calendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    private VndCurrencyFormatter currencyFormatter = new VndCurrencyFormatter();
-
-    // Flag để kiểm soát việc cập nhật EditText
-    private boolean isUpdatingAmountText = false;
+    private final DecimalFormat decimalFormat = new DecimalFormat("#,###");
 
     private ExpenseDialogListener listener;
 
@@ -91,11 +88,10 @@ public class ExpenseDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireActivity());
-
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_expense, null);
 
-        // Khởi tạo các View
+        // Initialize Views
         descriptionLayout = view.findViewById(R.id.description_layout);
         amountLayout = view.findViewById(R.id.amount_layout);
         descriptionEditText = view.findViewById(R.id.edit_description);
@@ -106,75 +102,30 @@ public class ExpenseDialogFragment extends DialogFragment {
         saveButton = view.findViewById(R.id.button_save);
         cancelButton = view.findViewById(R.id.button_cancel);
 
-        // Thêm TextWatcher để định dạng số tiền
-        amountEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Không cần xử lý
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Không cần xử lý
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (isUpdatingAmountText) return;
-
-                isUpdatingAmountText = true;
-
-                String input = s.toString().trim();
-                // Loại bỏ tất cả các ký tự không phải số
-                String digitsOnly = input.replaceAll("[^\\d]", "");
-
-                if (!digitsOnly.isEmpty()) {
-                    try {
-                        // Chuyển đổi thành số và định dạng lại
-                        double amount = Double.parseDouble(digitsOnly);
-                        // Chỉ định dạng, không thêm "VNĐ" vào EditText
-                        String formatted = digitsOnly.isEmpty() ? "" : currencyFormatter.format(amount)
-                                .replace(" VNĐ", ""); // Loại bỏ đơn vị tiền để không tích lũy
-
-                        s.replace(0, s.length(), formatted);
-                    } catch (NumberFormatException e) {
-                        s.replace(0, s.length(), "");
-                    }
-                }
-
-                isUpdatingAmountText = false;
-            }
-        });
-
-        // Thiết lập spinner danh mục
+        // Setup category spinner
         setupCategorySpinner();
 
-        // Thiết lập ngày mặc định (hôm nay)
+        // Setup TextWatcher for amount formatting
+        amountEditText.addTextChangedListener(amountTextWatcher());
+
+        // Set default date
         updateDateDisplay();
 
-        // Xử lý sự kiện click vào ngày để hiển thị date picker
+        // Date picker click listener
         dateButton.setOnClickListener(v -> showDatePicker());
 
-        // Điền thông tin nếu đang sửa
+        // Populate fields if editing
         if (expenseToEdit != null) {
             descriptionEditText.setText(expenseToEdit.getDescription());
-
-            // Định dạng số tiền với VndCurrencyFormatter
-            String formattedAmount = currencyFormatter.format(expenseToEdit.getAmount())
-                    .replace(" VNĐ", ""); // Loại bỏ đơn vị tiền
-
-            isUpdatingAmountText = true;
+            String formattedAmount = decimalFormat.format((long) expenseToEdit.getAmount());
             amountEditText.setText(formattedAmount);
-            isUpdatingAmountText = false;
 
             calendar.setTime(expenseToEdit.getDate());
             updateDateDisplay();
 
-            // Chọn danh mục
             if (categoryName != null && !categoryName.isEmpty()) {
                 categorySpinner.setText(categoryName, false);
             } else {
-                // Tìm tên danh mục dựa trên ID nếu không có sẵn
                 for (int i = 0; i < categories.size(); i++) {
                     if (categories.get(i).getCategoryID() == expenseToEdit.getCategoryID()) {
                         categorySpinner.setText(categories.get(i).getCategoryName(), false);
@@ -184,7 +135,7 @@ public class ExpenseDialogFragment extends DialogFragment {
             }
         }
 
-        // Xử lý sự kiện nút lưu
+        // Save button listener
         saveButton.setOnClickListener(v -> {
             if (validateInput()) {
                 saveExpense();
@@ -192,13 +143,49 @@ public class ExpenseDialogFragment extends DialogFragment {
             }
         });
 
-        // Xử lý sự kiện nút hủy
+        // Cancel button listener
         cancelButton.setOnClickListener(v -> dismiss());
 
         builder.setView(view);
         builder.setTitle(expenseToEdit != null ? "Sửa chi tiêu" : "Thêm chi tiêu mới");
 
         return builder.create();
+    }
+
+    private TextWatcher amountTextWatcher() {
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                amountEditText.removeTextChangedListener(this);
+                try {
+                    String originalString = s.toString();
+                    if (originalString.isEmpty()) {
+                        amountEditText.addTextChangedListener(this);
+                        return;
+                    }
+
+                    // Remove existing commas
+                    String cleanString = originalString.replaceAll("[,]", "");
+                    long longval = Long.parseLong(cleanString);
+
+                    DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.US);
+                    formatter.applyPattern("#,###");
+                    String formattedString = formatter.format(longval);
+
+                    amountEditText.setText(formattedString);
+                    amountEditText.setSelection(formattedString.length());
+                } catch (NumberFormatException e) {
+                    // Handle invalid input silently or show error if needed
+                }
+                amountEditText.addTextChangedListener(this);
+            }
+        };
     }
 
     private void setupCategorySpinner() {
@@ -223,18 +210,15 @@ public class ExpenseDialogFragment extends DialogFragment {
 
     private void showDatePicker() {
         try {
-            // Sử dụng MaterialDatePicker
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                     .setTitleText("Chọn ngày chi tiêu")
                     .setSelection(calendar.getTimeInMillis())
                     .build();
 
             datePicker.addOnPositiveButtonClickListener(selection -> {
-                // Đặt múi giờ về UTC để tránh vấn đề offset
                 Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 utcCalendar.setTimeInMillis(selection);
 
-                // Chuyển giá trị ngày về múi giờ local
                 calendar.set(Calendar.YEAR, utcCalendar.get(Calendar.YEAR));
                 calendar.set(Calendar.MONTH, utcCalendar.get(Calendar.MONTH));
                 calendar.set(Calendar.DAY_OF_MONTH, utcCalendar.get(Calendar.DAY_OF_MONTH));
@@ -245,7 +229,6 @@ public class ExpenseDialogFragment extends DialogFragment {
             datePicker.show(getChildFragmentManager(), "DATE_PICKER");
         } catch (Exception e) {
             e.printStackTrace();
-            // Fallback nếu MaterialDatePicker gặp lỗi
             Calendar now = Calendar.getInstance();
             android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(
                     requireContext(),
@@ -273,21 +256,20 @@ public class ExpenseDialogFragment extends DialogFragment {
             descriptionLayout.setError(null);
         }
 
-        String amountText = amountEditText.getText().toString().trim();
+        String amountText = amountEditText.getText().toString().trim().replaceAll("[,]", "");
         if (amountText.isEmpty()) {
             amountLayout.setError("Vui lòng nhập số tiền");
             isValid = false;
         } else {
             try {
-                // Chuyển đổi dữ liệu từ định dạng sang số
-                double amount = getCleanAmount(amountText);
+                double amount = Double.parseDouble(amountText);
                 if (amount <= 0) {
                     amountLayout.setError("Số tiền phải lớn hơn 0");
                     isValid = false;
                 } else {
                     amountLayout.setError(null);
                 }
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 amountLayout.setError("Số tiền không hợp lệ");
                 isValid = false;
             }
@@ -304,19 +286,11 @@ public class ExpenseDialogFragment extends DialogFragment {
         return isValid;
     }
 
-    private double getCleanAmount(String formattedAmount) {
-        // Loại bỏ tất cả dấu chấm (phân cách hàng nghìn) và đơn vị tiền
-        String digitsOnly = formattedAmount.replaceAll("[^\\d]", "");
-        if (digitsOnly.isEmpty()) {
-            return 0;
-        }
-        return Double.parseDouble(digitsOnly);
-    }
-
     private void saveExpense() {
         try {
             String description = descriptionEditText.getText().toString().trim();
-            double amount = getCleanAmount(amountEditText.getText().toString());
+            String amountText = amountEditText.getText().toString().trim().replaceAll("[,]", "");
+            double amount = Double.parseDouble(amountText);
             Date date = calendar.getTime();
 
             String selectedCategoryName = categorySpinner.getText().toString();

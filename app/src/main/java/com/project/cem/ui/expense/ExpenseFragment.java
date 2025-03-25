@@ -81,7 +81,7 @@ public class ExpenseFragment extends Fragment {
 
             // Thiết lập nút quản lý danh mục
             manageCategoriesButton.setOnClickListener(v -> {
-                showManageCategoriesDialog();
+                navigateToCategoryManagement();
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -217,9 +217,7 @@ public class ExpenseFragment extends Fragment {
     private void showAddExpenseDialog() {
         try {
             if (categories.isEmpty()) {
-                Snackbar.make(requireView(), "Vui lòng tạo ít nhất một danh mục chi tiêu trước", Snackbar.LENGTH_LONG)
-                        .setAction("Tạo ngay", v -> showManageCategoriesDialog())
-                        .show();
+                Toast.makeText(getContext(), "Danh sách danh mục trống", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -266,14 +264,9 @@ public class ExpenseFragment extends Fragment {
             Toast.makeText(getContext(), "Lỗi khi hiển thị form sửa chi tiêu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+    public void navigateToCategoryManagement(){
 
-    private void showManageCategoriesDialog() {
-//        try {
-//            ExpenseCategoryDialogFragment dialogFragment = ExpenseCategoryDialogFragment.newInstance();
-//            dialogFragment.show(getChildFragmentManager(), "ManageCategoriesDialog");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Toast.makeText(getContext(), "Lỗi khi hiển thị quản lý danh mục: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//        }
     }
+
+
 }
