@@ -18,53 +18,7 @@ public class ExpenseCategoryRepository {
         dbHelper = new SQLiteHelper(context);
     }
 
-    // Phương thức mới: Kiểm tra danh mục đã tồn tại chưa
-    public boolean isCategoryExist(int userID, String categoryName) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        boolean exists = false;
-
-        String query = "SELECT COUNT(*) FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
-                " WHERE userID = ? AND LOWER(categoryName) = LOWER(?)";
-
-        Cursor cursor = db.rawQuery(query, new String[]{
-                String.valueOf(userID),
-                categoryName.toLowerCase()
-        });
-
-        if (cursor.moveToFirst()) {
-            exists = cursor.getInt(0) > 0;
-        }
-
-        cursor.close();
-        db.close();
-        return exists;
-    }
-
-    // Phương thức mới: Kiểm tra danh mục đã tồn tại chưa (loại trừ ID hiện tại - dùng khi update)
-    public boolean isCategoryExistExcludeSelf(int userID, String categoryName, int excludeCategoryID) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        boolean exists = false;
-
-        String query = "SELECT COUNT(*) FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
-                " WHERE userID = ? AND LOWER(categoryName) = LOWER(?) AND categoryID != ?";
-
-        Cursor cursor = db.rawQuery(query, new String[]{
-                String.valueOf(userID),
-                categoryName.toLowerCase(),
-                String.valueOf(excludeCategoryID)
-        });
-
-        if (cursor.moveToFirst()) {
-            exists = cursor.getInt(0) > 0;
-        }
-
-        cursor.close();
-        db.close();
-        return exists;
-    }
-
-    // Các phương thức khác giữ nguyên...
-    // Lấy tất cả danh mục chi tiêu của người dùng
+    // Lấy tất cả danh mục của người dùng
     public List<ExpenseCategory> getAllCategories(int userID) {
         List<ExpenseCategory> categories = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -155,7 +109,7 @@ public class ExpenseCategoryRepository {
         return hasExpenses;
     }
 
-    // Đếm số lượng chi tiêu của mỗi danh mục
+    // Đếm số lượng chi tiêu trong mỗi danh mục
     public int getExpenseCountForCategory(int categoryID) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         int count = 0;
@@ -169,5 +123,50 @@ public class ExpenseCategoryRepository {
         cursor.close();
         db.close();
         return count;
+    }
+
+    // Kiểm tra danh mục đã tồn tại chưa
+    public boolean isCategoryExist(int userID, String categoryName) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        boolean exists = false;
+
+        String query = "SELECT COUNT(*) FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
+                " WHERE userID = ? AND LOWER(categoryName) = LOWER(?)";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                String.valueOf(userID),
+                categoryName.toLowerCase()
+        });
+
+        if (cursor.moveToFirst()) {
+            exists = cursor.getInt(0) > 0;
+        }
+
+        cursor.close();
+        db.close();
+        return exists;
+    }
+
+    // Kiểm tra danh mục đã tồn tại chưa (loại trừ ID hiện tại - dùng khi update)
+    public boolean isCategoryExistExcludeSelf(int userID, String categoryName, int excludeCategoryID) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        boolean exists = false;
+
+        String query = "SELECT COUNT(*) FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
+                " WHERE userID = ? AND LOWER(categoryName) = LOWER(?) AND categoryID != ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{
+                String.valueOf(userID),
+                categoryName.toLowerCase(),
+                String.valueOf(excludeCategoryID)
+        });
+
+        if (cursor.moveToFirst()) {
+            exists = cursor.getInt(0) > 0;
+        }
+
+        cursor.close();
+        db.close();
+        return exists;
     }
 }

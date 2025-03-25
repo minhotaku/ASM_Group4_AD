@@ -224,4 +224,7 @@ public class ExpenseCategoryViewModel extends AndroidViewModel {
             }
         });
     }
+    public void clearError(){
+        errorMessage.setValue(null);
+    }
 }

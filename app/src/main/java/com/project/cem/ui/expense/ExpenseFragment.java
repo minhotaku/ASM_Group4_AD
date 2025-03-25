@@ -26,6 +26,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.project.cem.R;
 import com.project.cem.model.ExpenseCategory;
 import com.project.cem.model.ExpenseWithCategory;
+import com.project.cem.ui.setting.report.ExpenseReportFragment;
 import com.project.cem.viewmodel.ExpenseCategoryViewModel;
 import com.project.cem.viewmodel.ExpenseViewModel;
 
@@ -266,7 +267,11 @@ public class ExpenseFragment extends Fragment {
         }
     }
     public void navigateToCategoryManagement(){
-
+        Fragment categoryFragment = new ExpenseCategoryFragment();
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, categoryFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
 
