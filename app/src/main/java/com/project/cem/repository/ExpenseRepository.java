@@ -12,6 +12,7 @@ import com.project.cem.utils.SQLiteHelper;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -25,7 +26,6 @@ public class ExpenseRepository {
         dbHelper = new SQLiteHelper(context);
     }
 
-    // Lấy tất cả chi tiêu của người dùng
     public List<ExpenseWithCategory> getAllExpenses(int userID) {
         List<ExpenseWithCategory> expenses = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -65,8 +65,13 @@ public class ExpenseRepository {
         }
         cursor.close();
         db.close();
+
+        // Đảm bảo sắp xếp theo ngày giảm dần
+        Collections.sort(expenses, (e1, e2) -> e2.getDate().compareTo(e1.getDate()));
+
         return expenses;
     }
+
 
     // Lấy chi tiêu theo danh mục
     public List<ExpenseWithCategory> getExpensesByCategory(int userID, int categoryID) {
@@ -106,9 +111,12 @@ public class ExpenseRepository {
         }
         cursor.close();
         db.close();
+
+        // Đảm bảo sắp xếp theo ngày giảm dần
+        Collections.sort(expenses, (e1, e2) -> e2.getDate().compareTo(e1.getDate()));
+
         return expenses;
     }
-
     // Thêm chi tiêu mới
     public long addExpense(Expense expense) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();

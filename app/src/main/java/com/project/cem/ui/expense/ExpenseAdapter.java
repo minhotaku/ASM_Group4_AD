@@ -15,11 +15,10 @@ import com.project.cem.utils.VndCurrencyFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class ExpenseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -51,16 +50,14 @@ public class ExpenseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private void processGroupedData() {
         items.clear();
 
-        // Sắp xếp nhóm theo tháng năm (gần đây nhất trước)
-        Map<String, List<ExpenseWithCategory>> sortedMap = new TreeMap<>(Collections.reverseOrder());
-        sortedMap.putAll(groupedExpenses);
-
-        for (Map.Entry<String, List<ExpenseWithCategory>> entry : sortedMap.entrySet()) {
+        // Map đã được sắp xếp từ ViewModel, chỉ cần chuyển đổi thành list
+        for (Map.Entry<String, List<ExpenseWithCategory>> entry : groupedExpenses.entrySet()) {
             // Thêm header tháng
             items.add(entry.getKey());
 
-            // Thêm các chi tiêu
-            items.addAll(entry.getValue());
+            // Thêm các chi tiêu - đảm bảo chi tiêu trong mỗi nhóm được sắp xếp theo ngày
+            List<ExpenseWithCategory> expensesInMonth = entry.getValue();
+            items.addAll(expensesInMonth);
         }
     }
 
