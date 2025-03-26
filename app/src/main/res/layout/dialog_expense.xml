@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:hint="Mô tả chi tiêu">
+        android:hint="Description of expense">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_description"
@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:hint="Số tiền (VNĐ)">
+        android:hint="Amount (VND)">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_amount"
@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:hint="Danh mục">
+        android:hint="Category">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/spinner_category"
@@ -56,7 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="Ngày chi tiêu"
+        android:text="Expense date"
         android:textStyle="bold" />
 
     <com.google.android.material.button.MaterialButton
@@ -80,13 +80,13 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hủy" />
+            android:text="Cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Lưu" />
+            android:text="Save" />
     </LinearLayout>
 </LinearLayout>

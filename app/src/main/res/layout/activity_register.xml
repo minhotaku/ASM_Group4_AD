@@ -29,7 +29,7 @@
         android:drawablePadding="16dp"
         android:ems="10"
         android:hint="Email"
-        android:inputType="text"
+        android:inputType="textEmailAddress"
         android:textColor="#756c6c"
         android:textColorHint="#756c6c"
         android:textSize="18sp"
@@ -50,7 +50,7 @@
         android:drawablePadding="16dp"
         android:ems="10"
         android:hint="Password"
-        android:inputType="text"
+        android:inputType="textPassword"
         android:textColor="#756c6c"
         android:textColorHint="#756c6c"
         android:textSize="18sp"
@@ -61,7 +61,7 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <EditText
-        android:id="@+id/edtRegisterConfirmedPassword"
+        android:id="@+id/edtConfirmedPassword"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_margin="32dp"
@@ -70,7 +70,7 @@
         android:drawablePadding="16dp"
         android:ems="10"
         android:hint="Confirm Password"
-        android:inputType="text"
+        android:inputType="textPassword"
         android:textColor="#756c6c"
         android:textColorHint="#756c6c"
         android:textSize="18sp"
@@ -94,7 +94,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtRegisterConfirmedPassword" />
+        app:layout_constraintTop_toBottomOf="@+id/edtConfirmedPassword" />
 
     <TextView
         android:id="@+id/textView"

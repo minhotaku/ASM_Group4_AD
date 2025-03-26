@@ -1,6 +1,7 @@
 package com.project.cem.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 public class ValidationUtils {
 
     private static final String EMAIL_REGEX =

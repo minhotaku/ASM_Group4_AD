@@ -15,10 +15,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.project.cem.R;
+import com.project.cem.utils.ValidationUtils;
 import com.project.cem.viewmodel.RegisterViewModel;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText edtRegisterEmail, edtRegisterPassword;
+    private EditText edtRegisterEmail, edtRegisterPassword, edtConfirmedPassword;
     private Button btnRegister;
     private TextView textViewMoveLogin;
     private RegisterViewModel registerViewModel;
@@ -31,6 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
         // Khởi tạo view
         edtRegisterEmail = findViewById(R.id.edtRegisterEmail);
         edtRegisterPassword = findViewById(R.id.edtRegisterPassword);
+        edtConfirmedPassword = findViewById(R.id.edtConfirmedPassword);
         btnRegister = findViewById(R.id.btnRegister);
         textViewMoveLogin = findViewById(R.id.textViewMoveLogin);
 
@@ -38,8 +40,17 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(v -> {
             String email = edtRegisterEmail.getText().toString();
             String password = edtRegisterPassword.getText().toString();
-            if(email.isBlank() || password.isBlank()){
-                Toast.makeText(RegisterActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+            String confirmPassword = edtConfirmedPassword.getText().toString();
+            if(!ValidationUtils.isValidEmail(email)){
+                Toast.makeText(RegisterActivity.this, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(!ValidationUtils.isValidPassword(password)){
+                Toast.makeText(RegisterActivity.this, "Mật khẩu phải có ít nhất 5 ký tự, bao gồm chữ và số", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(!confirmPassword.equals(password)){
+                Toast.makeText(RegisterActivity.this, "Mật khẩu không trùng nhau", Toast.LENGTH_SHORT).show();
                 return;
             }
             registerViewModel.register(email, password);
@@ -48,7 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         textViewMoveLogin.setOnClickListener(v -> {
             navigateLogin();
-                });
+        });
 
 
         registerViewModel.getRegisterStatus().observe(this,success->{

@@ -10,14 +10,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:title="Quản lý loại chi tiêu"
-            app:titleTextColor="@android:color/white"
-            app:navigationIcon="@android:drawable/ic_menu_revert" />
+            android:background="?attr/colorPrimary">
+
+            <!-- Back Button -->
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginStart="5dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Go back"
+                android:src="@android:drawable/ic_menu_revert"
+                android:tint="@android:color/white" />
+
+            <!-- Toolbar - preserving your original toolbar -->
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_marginStart="40dp"
+                android:background="?attr/colorPrimary"
+                app:title="Expense Category Management"
+                app:titleTextColor="@android:color/white" />
+        </RelativeLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -51,8 +72,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="Thêm loại chi tiêu mới"
+                    android:layout_marginBottom="16dp"
+                    android:text="Add new expense category"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -67,7 +88,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:hint="Tên loại chi tiêu">
+                        android:hint="Category Name">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/edit_category_name"
@@ -81,7 +102,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Thêm" />
+                        android:text="Add" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -93,7 +114,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
-            android:text="Danh sách loại chi tiêu"
+            android:text="Expense Category List"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -127,7 +148,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Không có loại chi tiêu nào\nHãy thêm loại chi tiêu mới"
+                android:text="No expense category available\nAdd a new expense category"
                 android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>

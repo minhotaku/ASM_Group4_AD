@@ -11,11 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="Tùy chọn khoản chi tiêu"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textAlignment="center"
-        android:textColor="?attr/colorPrimary"/>
+        android:text="Expense Options"
+    android:textSize="20sp"
+    android:textStyle="bold"
+    android:textAlignment="center"
+    android:textColor="?attr/colorPrimary"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_edit"
@@ -25,10 +25,10 @@
         android:layout_marginBottom="8dp"
         android:gravity="center_vertical"
         android:paddingVertical="12dp"
-        android:text="Chỉnh sửa khoản chi tiêu"
-        android:textColor="?attr/colorPrimary"
-        app:icon="@android:drawable/ic_menu_edit"
-        app:iconTint="?attr/colorPrimary"/>
+        android:text="Edit Expense"
+    android:textColor="?attr/colorPrimary"
+    app:icon="@android:drawable/ic_menu_edit"
+    app:iconTint="?attr/colorPrimary"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_delete"
@@ -37,9 +37,9 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:paddingVertical="12dp"
-        android:text="Xóa khoản chi tiêu"
-        android:textColor="#D32F2F"
-        app:icon="@android:drawable/ic_menu_delete"
-        app:iconTint="#D32F2F"/>
+        android:text="Delete Expense"
+    android:textColor="#D32F2F"
+    app:icon="@android:drawable/ic_menu_delete"
+    app:iconTint="#D32F2F"/>
 
 </LinearLayout>

@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:title="Quản lý chi tiêu"
+            app:title="Expense Management"
             app:titleTextColor="@android:color/white" />
 
         <LinearLayout
@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Lọc theo danh mục">
+                android:hint="Filter by Category">
 
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/category_filter_spinner"
@@ -46,7 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="Danh mục"
+                android:text="Categories"
                 app:icon="@android:drawable/ic_menu_manage" />
         </LinearLayout>
 
@@ -79,7 +79,7 @@
                 android:drawablePadding="16dp"
                 android:gravity="center"
                 android:padding="32dp"
-                android:text="Không có khoản chi tiêu nào\nNhấn nút + để thêm chi tiêu mới"
+                android:text="There are no expenses\nClick + to add new expense"
                 android:textSize="16sp"
                 android:visibility="gone" />
 
@@ -101,7 +101,7 @@
         android:layout_gravity="bottom|center"
         android:layout_margin="16dp"
 
-        android:contentDescription="Thêm chi tiêu mới"
+        android:contentDescription="Add new expense"
         app:backgroundTint="?attr/colorPrimary"
         app:srcCompat="@android:drawable/ic_input_add"
         app:tint="@android:color/white" />

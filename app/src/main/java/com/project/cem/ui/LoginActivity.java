@@ -4,14 +4,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+
 import com.project.cem.R;
 import com.project.cem.utils.SampleDataInitializer;
 import com.project.cem.utils.UserPreferences;
+import com.project.cem.utils.ValidationUtils;
 import com.project.cem.viewmodel.LoginViewModel;
 
 
@@ -33,8 +35,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
         // Khởi tạo dữ liệu mẫu
-        SampleDataInitializer sampleDataInitializer = new SampleDataInitializer(this);
-        sampleDataInitializer.initializeSampleData();
+//        SampleDataInitializer sampleDataInitializer = new SampleDataInitializer(this);
+//        sampleDataInitializer.initializeSampleData();
 
         setContentView(R.layout.activity_login);
 
@@ -50,10 +52,12 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> {
             String email = edtEmail.getText().toString();
             String password = edtPassword.getText().toString();
-
-            if (email.isEmpty() || password.isEmpty()) {
-                // Check email hoặc password có trống hay không
-                Toast.makeText(LoginActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+            if(!ValidationUtils.isValidEmail(email)){
+                Toast.makeText(LoginActivity.this, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(!ValidationUtils.isValidPassword(password)){
+                Toast.makeText(LoginActivity.this, "Mật khẩu phải có ít nhất 5 ký tự, bao gồm chữ và số", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -77,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             } else {
                 // Đăng nhập thất bại
-                Toast.makeText(LoginActivity.this, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Sai mật khẩu hoặc tài khoản", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -117,7 +117,7 @@ public class HomeFragment extends Fragment {
         pieChart.setHoleColor(Color.WHITE);
         pieChart.setTransparentCircleRadius(61f);
         pieChart.setDrawCenterText(true);
-        pieChart.setCenterText("Chi tiêu");
+        pieChart.setCenterText("Spending");
         pieChart.animateY(1000);
 
         Legend legend = pieChart.getLegend();
@@ -140,7 +140,7 @@ public class HomeFragment extends Fragment {
             colors.add(item.getColorCode());
         }
 
-        PieDataSet dataSet = new PieDataSet(entries, "Danh mục chi tiêu");
+        PieDataSet dataSet = new PieDataSet(entries, "Spending Categories");
         dataSet.setColors(colors);
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.WHITE);

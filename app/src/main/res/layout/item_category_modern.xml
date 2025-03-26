@@ -32,7 +32,7 @@
                 android:textColor="#212121"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                tools:text="Ăn uống" />
+                tools:text="Food and drink" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_expense_count"
@@ -48,7 +48,7 @@
                 app:chipIconTint="#757575"
                 app:chipStrokeWidth="0dp"
                 android:textColor="#757575"
-                tools:text="5 chi tiêu" />
+                tools:text="5 expense" />
         </LinearLayout>
 
         <LinearLayout
@@ -62,7 +62,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:contentDescription="Sửa loại chi tiêu"
+                android:contentDescription="Edit expense category"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
@@ -86,7 +86,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:contentDescription="Xóa loại chi tiêu"
+                android:contentDescription="Delete expense category"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"

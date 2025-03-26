@@ -87,12 +87,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void replaceFragment(Fragment fragment) {
+        // Lấy fragment hiện tại
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout);
+
+        // Kiểm tra xem fragment hiện tại có phải là fragment cần thay thế không
+        if (currentFragment != null && currentFragment.getClass().equals(fragment.getClass())) {
+            return;
+        }
+
+        // Nếu không, thay thế fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         fragmentTransaction.commit();
-
     }
+
     public static void scheduleBudgetCheck(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, BudgetBroadcastReceiver.class); // Sử dụng BroadcastReceiver
@@ -139,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     dialog.dismiss();
-                    Toast.makeText(this,"Notification are disable", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Notification are disable", Toast.LENGTH_SHORT).show();
                 })
                 .show();
     }

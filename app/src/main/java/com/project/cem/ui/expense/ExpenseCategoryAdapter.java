@@ -56,7 +56,8 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
         holder.categoryNameTextView.setText(category.getCategoryName());
 
         int count = categoryCounts.getOrDefault(category.getCategoryID(), 0);
-        holder.expenseCountChip.setText(count + " chi tiêu");
+        String expenseText = count <= 1 ? " expense" : " expenses";
+        holder.expenseCountChip.setText(count + expenseText);
 
         // Disable nút xóa nếu danh mục có chi tiêu
         holder.deleteButton.setEnabled(count == 0);

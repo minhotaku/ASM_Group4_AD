@@ -139,7 +139,7 @@ public class ExpenseDialogFragment extends DialogFragment {
         cancelButton.setOnClickListener(v -> dismiss());
 
         builder.setView(view);
-        builder.setTitle(expenseToEdit != null ? "Sửa chi tiêu" : "Thêm chi tiêu mới");
+        builder.setTitle(expenseToEdit != null ? "Edit Expense" : "Add New Expense");
 
         return builder.create();
     }

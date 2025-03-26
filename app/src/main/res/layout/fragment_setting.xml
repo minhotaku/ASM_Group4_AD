@@ -24,7 +24,7 @@
         android:id="@+id/tvDashboardSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Quản lý chi tiêu"
+        android:text="Manage expenses"
         android:textSize="16sp"
         android:textColor="#757575"
         android:layout_marginTop="8dp"
@@ -71,15 +71,15 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chi tiêu định kỳ"
+                    android:text="Recurring expenses"
                     android:textSize="18sp"
                     android:textColor="#212121"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Quản lý các khoản chi tiêu định kỳ hàng tháng"
+                    android:text="Manage your monthly recurring expenses"
                     android:textSize="14sp"
                     android:textColor="#757575" />
             </LinearLayout>
@@ -136,15 +136,15 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Báo cáo chi tiêu"
+                    android:text="Expense report"
                     android:textSize="18sp"
                     android:textColor="#212121"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Xem thống kê và phân tích chi tiêu"
+                    android:text="View expense statistics and analysis"
                     android:textSize="14sp"
                     android:textColor="#757575" />
             </LinearLayout>
@@ -174,7 +174,7 @@
         android:id="@+id/btnGoToChangePassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Thay đổi mật khẩu"
+        android:text="Change password"
         android:textSize="16sp"
         android:paddingVertical="12dp"
         android:layout_marginTop="32dp"
@@ -187,7 +187,7 @@
         android:id="@+id/btnLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đăng xuất"
+        android:text="Logout"
         android:textSize="16sp"
         android:paddingVertical="12dp"
         android:layout_marginTop="16dp"

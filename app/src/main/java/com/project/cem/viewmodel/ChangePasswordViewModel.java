@@ -13,7 +13,8 @@ import androidx.lifecycle.ViewModel;
 import com.project.cem.model.User;
 import com.project.cem.repository.UserRepository;
 import com.project.cem.utils.UserPreferences;
-
+import com.project.cem.utils.ValidationUtils;
+import com.project.cem.utils.ValidationUtils;
 public class ChangePasswordViewModel extends AndroidViewModel {
     private final UserRepository userRepository;
 
@@ -29,6 +30,15 @@ public class ChangePasswordViewModel extends AndroidViewModel {
     public void changePassword(String oldPassword, String newPassword, String confirmPassword) {
         if(oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()){
             errorMessage.setValue("Vui lòng nhập đầy đủ thông tin");
+            return;
+        }
+        if(ValidationUtils.isValidPassword(newPassword) == false){
+            errorMessage.setValue("Mật khẩu phải có ít nhất 5 ký tự, bao gồm chữ và số");
+            return;
+        }
+
+        if(oldPassword.equals(newPassword)){
+            errorMessage.setValue("Mật khẩu mới không được trùng với mật khẩu cũ");
             return;
         }
 

@@ -139,7 +139,7 @@ public class ExpenseFragment extends Fragment {
     private void setupCategorySpinner() {
         try {
             List<String> categoryNames = new ArrayList<>();
-            categoryNames.add("Tất cả danh mục");
+            categoryNames.add("All Categories");
 
             for (ExpenseCategory category : categories) {
                 categoryNames.add(category.getCategoryName());
@@ -151,7 +151,7 @@ public class ExpenseFragment extends Fragment {
 
             categoryFilterSpinner.setOnItemClickListener((parent, view, position, id) -> {
                 if (position == 0) {
-                    // "Tất cả danh mục" được chọn
+                    // "All Categories" is selected
                     expenseViewModel.clearFilter();
                 } else {
                     // Một danh mục cụ thể được chọn
@@ -161,7 +161,7 @@ public class ExpenseFragment extends Fragment {
             });
 
             // Mặc định hiển thị tất cả
-            categoryFilterSpinner.setText("Tất cả danh mục", false);
+            categoryFilterSpinner.setText("All Categories", false);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getContext(), "Lỗi khi thiết lập bộ lọc danh mục: " + e.getMessage(), Toast.LENGTH_SHORT).show();

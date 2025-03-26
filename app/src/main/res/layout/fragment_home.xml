@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tổng quan chi tiêu"
+            android:text="Spending Overview"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -24,7 +24,7 @@
         <TextView
             android:id="@+id/monthYearTextView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+             android:layout_height="wrap_content"
             android:text="Tháng 3 2025"
             android:textSize="16sp"
             android:textColor="@android:color/darker_gray"
@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tổng chi tiêu:"
+            android:text="Total Spending:"
             android:textSize="16sp"
             android:textColor="@android:color/black"/>
 
@@ -70,15 +70,15 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Không có dữ liệu chi tiêu trong tháng này"
+                android:text="No spending data for this month"
                 android:textAlignment="center"
                 android:textSize="18sp"
                 android:textColor="@android:color/darker_gray"/>
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Thêm chi tiêu đầu tiên để xem phân tích"
+               android:layout_height="wrap_content"
+                android:text="Add your first expense to see the analysis"
                 android:textAlignment="center"
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray"
@@ -95,7 +95,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Danh mục chi tiêu"
+            android:text="Spending Categories"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
@@ -127,7 +127,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="So sánh với ngân sách"
+                    android:text="Compare with Budget"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
@@ -142,7 +142,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Tổng chi tiêu:"/>
+                        android:text="Total Spending:"/>
 
                     <TextView
                         android:id="@+id/totalSpendingTextView2"
@@ -163,7 +163,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Ngân sách tháng:"/>
+                        android:text="Monthly Budget:"/>
 
                     <TextView
                         android:id="@+id/totalBudgetTextView"

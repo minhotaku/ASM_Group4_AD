@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.project.cem.model.User;
 import com.project.cem.utils.SQLiteHelper;
+
 public class UserRepository {
 
     private SQLiteHelper sqLiteHelper;
@@ -17,7 +18,7 @@ public class UserRepository {
         sqLiteHelper = new SQLiteHelper(context); // Khởi tạo SQLiteHelper với context
     }
 
-    public User login(String email, String password){
+    public User login(String email, String password) {
         SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
         User user = null;
         String selection = "email = ? AND password = ?";
@@ -67,6 +68,11 @@ public class UserRepository {
         long id = -1;
         try {
             id = db.insert(SQLiteHelper.TABLE_USER, null, values);
+
+            // If registration is successful, create default categories for the new user
+            if (id != -1) {
+                createDefaultCategories((int) id);
+            }
         } catch (SQLException e) {
             e.printStackTrace(); // Log the exception
         } finally {
@@ -75,6 +81,7 @@ public class UserRepository {
 
         return id != -1; // Trả về true nếu đăng ký thành công, false nếu thất bại
     }
+
     public boolean changePassword(int userID, String newPassword) {
         SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -98,6 +105,41 @@ public class UserRepository {
         }
 
         return count > 0; // Return true if password was changed successfully, false if failed
+    }
+
+    private void createDefaultCategories(int userID) {
+        // Define default categories
+        String[] defaultCategories = {
+                "Food & Dining",
+                "Transportation",
+                "Housing",
+                "Entertainment",
+                "Other"
+        };
+
+        SQLiteDatabase db = sqLiteHelper.getWritableDatabase();
+
+        try {
+            // Begin transaction for better performance when inserting multiple records
+            db.beginTransaction();
+
+            for (String categoryName : defaultCategories) {
+                ContentValues values = new ContentValues();
+                values.put("userID", userID);
+                values.put("categoryName", categoryName);
+
+                db.insert(SQLiteHelper.TABLE_EXPENSE_CATEGORY, null, values);
+            }
+
+            // Mark transaction as successful
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // End transaction
+            db.endTransaction();
+            db.close();
+        }
     }
 
 
