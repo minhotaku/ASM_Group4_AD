@@ -110,7 +110,7 @@ public class UserRepository {
     private void createDefaultCategories(int userID) {
         // Define default categories
         String[] defaultCategories = {
-                "Food & Dining",
+                "Food",
                 "Transportation",
                 "Housing",
                 "Entertainment",
