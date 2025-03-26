@@ -74,7 +74,7 @@ public class RecurringExpenseViewModel extends AndroidViewModel {
                     allRecurringExpenses.setValue(recurringExpenses);
                 });
             } finally {
-                // Consider closing here *if* you're not managing it elsewhere
+
             }
         }).start();
     }
@@ -106,7 +106,7 @@ public class RecurringExpenseViewModel extends AndroidViewModel {
                     isLoading.setValue(false);
                     errorMessage.setValue("A recurring expense with this description, month, and year already exists."); // Sửa thông báo
                 });
-                return; // Exit if overlapping
+                return; //
             }
             try {
                 long result = recurringExpenseRepository.insert(db, recurringExpense);
@@ -114,7 +114,7 @@ public class RecurringExpenseViewModel extends AndroidViewModel {
                     isLoading.setValue(false);
                     if (result != -1) {
                         messageLiveData.setValue("Recurring Expense added successfully!");
-                        errorMessage.setValue(null);  // Clear error
+                        errorMessage.setValue(null);
                         loadRecurringExpenses(recurringExpense.getUserID()); // Reload
                         loadCategories(); // Reload categories
                     } else {
@@ -122,7 +122,7 @@ public class RecurringExpenseViewModel extends AndroidViewModel {
                     }
                 });
             } finally {
-                // Don't close db
+
             }
         }).start();
     }

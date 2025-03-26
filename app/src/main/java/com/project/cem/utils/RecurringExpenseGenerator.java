@@ -23,9 +23,46 @@ public class RecurringExpenseGenerator {
         this.context = context;
         this.dbHelper = new SQLiteHelper(context);
     }
+    // Thêm phương thức mới vào lớp RecurringExpenseGenerator
+    public void cleanupInactiveRecurringExpenses() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        try {
+            db.beginTransaction();
 
+            // Lấy ngày hiện tại
+            Calendar today = Calendar.getInstance();
+            int currentMonth = today.get(Calendar.MONTH) + 1; // Month is 0-indexed
+            int currentYear = today.get(Calendar.YEAR);
+
+            // Xóa các khoản chi cố định không còn active từ kỳ trước
+            String deleteQuery = "DELETE FROM " + SQLiteHelper.TABLE_RECURRING_EXPENSE +
+                    " WHERE isActive = 0 AND (year < ? OR (year = ? AND month < ?))";
+
+            db.execSQL(deleteQuery, new String[]{
+                    String.valueOf(currentYear),
+                    String.valueOf(currentYear),
+                    String.valueOf(currentMonth)
+            });
+
+            Cursor cursor = db.rawQuery("SELECT changes() AS affected_rows", null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int affectedRows = cursor.getInt(cursor.getColumnIndexOrThrow("affected_rows"));
+                Log.i("RecurringExpenseGenerator", "Đã xóa " + affectedRows + " khoản chi cố định không còn active từ kỳ trước");
+                cursor.close();
+            }
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("RecurringExpenseGenerator", "Lỗi khi xóa khoản chi cố định inactive", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
     // Method to check and generate recurring expenses
     public void generateRecurringExpenses() {
+        // Đầu tiên dọn dẹp các khoản chi cố định không còn active
+        cleanupInactiveRecurringExpenses();
         SQLiteDatabase db = dbHelper.getWritableDatabase(); // Use writable database
         try {
             db.beginTransaction();

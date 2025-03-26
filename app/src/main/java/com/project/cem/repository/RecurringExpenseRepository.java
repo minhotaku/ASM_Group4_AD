@@ -40,22 +40,75 @@ public class RecurringExpenseRepository {
         return dbHelper.getReadableDatabase();
     }
 
-    // Method to add a recurring expense
-    public long insert(SQLiteDatabase db, RecurringExpense recurringExpense) {
+    // Method to create a new expense from a recurring expense
+    private long createExpenseFromRecurring(SQLiteDatabase db, RecurringExpense recurringExpense) {
+        // Get current date
+        Date currentDate = new Date(); // Creates a Date object with the current date/time
+
         ContentValues values = new ContentValues();
         values.put("userID", recurringExpense.getUserID());
         values.put("categoryID", recurringExpense.getCategoryID());
-        values.put("description", recurringExpense.getDescription());
+        values.put("description", recurringExpense.getDescription() + " (Recurring)"); // Mark as recurring
         values.put("amount", recurringExpense.getAmount());
-        values.put("month", recurringExpense.getMonth());
-        values.put("year", recurringExpense.getYear());
-        values.put("recurrenceFrequency", recurringExpense.getRecurrenceFrequency());
-        // Add isActive to ContentValues
-        values.put("isActive", recurringExpense.isActive() ? 1 : 0); // Convert boolean to int
 
-        return db.insert(SQLiteHelper.TABLE_RECURRING_EXPENSE, null, values);
+        // Format the date for SQLite storage (YYYY-MM-DD format)
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = dateFormat.format(currentDate);
+        values.put("date", formattedDate);
+
+        // No need to put expenseID as it's autoincrement
+
+        return db.insert(SQLiteHelper.TABLE_EXPENSE, null, values);
     }
 
+
+    // Method to add a recurring expense
+// Method to add a recurring expense and automatically create an expense entry
+    public long insert(SQLiteDatabase db, RecurringExpense recurringExpense) {
+        long result = -1;
+
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("userID", recurringExpense.getUserID());
+            values.put("categoryID", recurringExpense.getCategoryID());
+            values.put("description", recurringExpense.getDescription());
+            values.put("amount", recurringExpense.getAmount());
+            values.put("month", recurringExpense.getMonth());
+            values.put("year", recurringExpense.getYear());
+            values.put("recurrenceFrequency", recurringExpense.getRecurrenceFrequency());
+            values.put("isActive", recurringExpense.isActive() ? 1 : 0);
+
+            // Insert the recurring expense
+            result = db.insert(SQLiteHelper.TABLE_RECURRING_EXPENSE, null, values);
+
+            // If insertion was successful and the recurring expense is active
+            if (result != -1 && recurringExpense.isActive()) {
+                // Set the ID of the newly created recurring expense
+                recurringExpense.setRecurringExpenseID((int) result);
+
+                // Create the first expense entry for current month
+                Calendar today = Calendar.getInstance();
+                int currentMonth = today.get(Calendar.MONTH) + 1; // 0-indexed to 1-indexed
+                int currentYear = today.get(Calendar.YEAR);
+
+                // Only create expense if the recurring expense is for the current month/year or in the future
+                if ((recurringExpense.getYear() > currentYear) ||
+                        (recurringExpense.getYear() == currentYear && recurringExpense.getMonth() >= currentMonth)) {
+                    createExpenseFromRecurring(db, recurringExpense);
+                }
+            }
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("RecurringExpenseRepo", "Error creating recurring expense: " + e.getMessage());
+            result = -1;
+        } finally {
+            db.endTransaction();
+        }
+
+        return result;
+    }
     // Method to get all recurring expenses for a user
     public List<RecurringExpense> getAllRecurringExpenses(SQLiteDatabase db, int userId) {
         List<RecurringExpense> recurringExpenses = new ArrayList<>();
