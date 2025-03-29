@@ -6,14 +6,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.project.cem.model.ExpenseReportModels;
+import com.project.cem.model.YearlyExpenseReport;
 import com.project.cem.utils.SQLiteHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class ExpenseReportRepository {
     private final SQLiteHelper dbHelper;
@@ -209,5 +212,145 @@ public class ExpenseReportRepository {
             total += budget.getAmount();
         }
         return total;
+    }
+
+    public YearlyExpenseReport getYearlyExpenseReport(int userId, int year) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        // Get monthly totals for the year
+        List<YearlyExpenseReport.MonthlyTotal> monthlyTotals = getMonthlyTotalsForYear(db, userId, year);
+
+        // Get category totals for the year
+        List<YearlyExpenseReport.CategoryTotal> categoryTotals = getCategoryTotalsForYear(db, userId, year);
+
+        // Calculate total yearly expenses
+        double totalYearlyExpenses = 0;
+        for (YearlyExpenseReport.MonthlyTotal monthlyTotal : monthlyTotals) {
+            totalYearlyExpenses += monthlyTotal.getTotalAmount();
+        }
+
+        db.close();
+
+        return new YearlyExpenseReport(year, totalYearlyExpenses, monthlyTotals, categoryTotals);
+    }
+
+    private List<YearlyExpenseReport.MonthlyTotal> getMonthlyTotalsForYear(SQLiteDatabase db, int userId, int year) {
+        List<YearlyExpenseReport.MonthlyTotal> monthlyTotals = new ArrayList<>();
+
+        // Initialize with zero values for all months (1-12)
+        for (int month = 1; month <= 12; month++) {
+            monthlyTotals.add(new YearlyExpenseReport.MonthlyTotal(month, 0, 0));
+        }
+
+        // Query for monthly expense totals
+        String expenseQuery = "SELECT strftime('%m', e.date) as month, SUM(e.amount) as total_amount " +
+                "FROM " + SQLiteHelper.TABLE_EXPENSE + " e " +
+                "WHERE e.userID = ? AND strftime('%Y', e.date) = ? " +
+                "GROUP BY strftime('%m', e.date)";
+
+        String yearStr = String.valueOf(year);
+
+        try (Cursor cursor = db.rawQuery(expenseQuery, new String[]{String.valueOf(userId), yearStr})) {
+            while (cursor.moveToNext()) {
+                String monthStr = cursor.getString(cursor.getColumnIndexOrThrow("month"));
+                double totalAmount = cursor.getDouble(cursor.getColumnIndexOrThrow("total_amount"));
+
+                // Convert month string to integer (removing leading zero if present)
+                int month = Integer.parseInt(monthStr);
+
+                // Update the monthly total (month-1 because list is 0-indexed but months are 1-indexed)
+                monthlyTotals.set(month-1, new YearlyExpenseReport.MonthlyTotal(month, totalAmount, 0));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting monthly totals for year", e);
+        }
+
+        // Query for monthly budget totals
+        String budgetQuery = "SELECT month, SUM(amount) as total_budget " +
+                "FROM " + SQLiteHelper.TABLE_BUDGET + " " +
+                "WHERE userID = ? AND year = ? " +
+                "GROUP BY month";
+
+        try (Cursor cursor = db.rawQuery(budgetQuery, new String[]{String.valueOf(userId), yearStr})) {
+            while (cursor.moveToNext()) {
+                int month = cursor.getInt(cursor.getColumnIndexOrThrow("month"));
+                double totalBudget = cursor.getDouble(cursor.getColumnIndexOrThrow("total_budget"));
+
+                // Get the existing monthly total and update it with the budget
+                YearlyExpenseReport.MonthlyTotal existing = monthlyTotals.get(month-1);
+                monthlyTotals.set(month-1, new YearlyExpenseReport.MonthlyTotal(
+                        month, existing.getTotalAmount(), totalBudget));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting monthly budgets for year", e);
+        }
+
+        return monthlyTotals;
+    }
+
+    private List<YearlyExpenseReport.CategoryTotal> getCategoryTotalsForYear(SQLiteDatabase db, int userId, int year) {
+        Map<Integer, YearlyExpenseReport.CategoryTotal> categoryMap = new HashMap<>();
+
+        // Get all categories first
+        String categoryQuery = "SELECT categoryID, categoryName FROM " + SQLiteHelper.TABLE_EXPENSE_CATEGORY +
+                " WHERE userID = ? OR userID IS NULL";
+
+        try (Cursor cursor = db.rawQuery(categoryQuery, new String[]{String.valueOf(userId)})) {
+            while (cursor.moveToNext()) {
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("categoryName"));
+
+                // Initialize with zero values for each month
+                List<Double> monthlyAmounts = new ArrayList<>();
+                for (int i = 0; i < 12; i++) {
+                    monthlyAmounts.add(0.0);
+                }
+
+                categoryMap.put(categoryId, new YearlyExpenseReport.CategoryTotal(
+                        categoryId, categoryName, 0, monthlyAmounts));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting categories", e);
+        }
+
+        // Get monthly expenses by category
+        String expenseQuery = "SELECT e.categoryID, c.categoryName, strftime('%m', e.date) as month, " +
+                "SUM(e.amount) as total_amount " +
+                "FROM " + SQLiteHelper.TABLE_EXPENSE + " e " +
+                "LEFT JOIN " + SQLiteHelper.TABLE_EXPENSE_CATEGORY + " c ON e.categoryID = c.categoryID " +
+                "WHERE e.userID = ? AND strftime('%Y', e.date) = ? " +
+                "GROUP BY e.categoryID, strftime('%m', e.date)";
+
+        String yearStr = String.valueOf(year);
+
+        try (Cursor cursor = db.rawQuery(expenseQuery, new String[]{String.valueOf(userId), yearStr})) {
+            while (cursor.moveToNext()) {
+                int categoryId = cursor.getInt(cursor.getColumnIndexOrThrow("categoryID"));
+                String monthStr = cursor.getString(cursor.getColumnIndexOrThrow("month"));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow("total_amount"));
+
+                int month = Integer.parseInt(monthStr);
+
+                // Update the category data if it exists
+                if (categoryMap.containsKey(categoryId)) {
+                    YearlyExpenseReport.CategoryTotal category = categoryMap.get(categoryId);
+                    List<Double> monthlyAmounts = new ArrayList<>(category.getMonthlyAmounts());
+                    monthlyAmounts.set(month-1, amount);
+
+                    double totalAmount = category.getTotalAmount() + amount;
+
+                    categoryMap.put(categoryId, new YearlyExpenseReport.CategoryTotal(
+                            categoryId, category.getCategoryName(), totalAmount, monthlyAmounts));
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting category expenses by month", e);
+        }
+
+        // Convert map to list and sort by total amount
+        List<YearlyExpenseReport.CategoryTotal> result = new ArrayList<>(categoryMap.values());
+        result.sort((c1, c2) -> Double.compare(c2.getTotalAmount(), c1.getTotalAmount()));
+
+        return result;
     }
 }

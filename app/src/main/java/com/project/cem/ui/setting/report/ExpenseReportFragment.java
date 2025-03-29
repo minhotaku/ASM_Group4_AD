@@ -27,6 +27,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.button.MaterialButton;
 import com.project.cem.R;
 import com.project.cem.model.ExpenseReportModels;
+import com.project.cem.model.YearlyExpenseReport;
 import com.project.cem.utils.VndCurrencyFormatter;
 import com.project.cem.viewmodel.ExpenseReportViewModel;
 
@@ -94,11 +95,17 @@ public class ExpenseReportFragment extends Fragment {
     private void setupListeners() {
         btnPreviousMonth.setOnClickListener(v -> viewModel.previousMonth());
         btnNextMonth.setOnClickListener(v -> viewModel.nextMonth());
-
         btnToggleYearlyReport.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Yearly report will be implemented later", Toast.LENGTH_SHORT).show();
-        });
+            // Tạo instance của YearExpenseReportFragment
+            YearExpenseReportFragment yearFragment = new YearExpenseReportFragment();
 
+            // Thay thế fragment hiện tại bằng YearExpenseReportFragment
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.frame_layout, yearFragment)  // fragment_container là ID của container chứa fragment
+                    .addToBackStack(null)  // Cho phép quay lại bằng nút Back
+                    .commit();
+        });
         btnExportReport.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Export functionality will be implemented later", Toast.LENGTH_SHORT).show();
         });
@@ -158,7 +165,7 @@ public class ExpenseReportFragment extends Fragment {
         leftAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return vndFormatter.format(value);
+                return vndFormatter.formatInMillions(value);
             }
         });
 
@@ -182,7 +189,7 @@ public class ExpenseReportFragment extends Fragment {
         leftAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return vndFormatter.format(value);
+                return vndFormatter.formatInMillions(value);
             }
         });
 
@@ -231,7 +238,7 @@ public class ExpenseReportFragment extends Fragment {
             @Override
             public String getFormattedValue(float value) {
                 if (value > 0) {
-                    return vndFormatter.format(value);
+                    return vndFormatter.formatInMillions(value);
                 }
                 return "";
             }
@@ -271,7 +278,7 @@ public class ExpenseReportFragment extends Fragment {
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                return vndFormatter.format(value);
+                return vndFormatter.formatInMillions(value);
             }
         });
 
