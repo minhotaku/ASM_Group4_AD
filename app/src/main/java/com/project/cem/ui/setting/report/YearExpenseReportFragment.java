@@ -657,6 +657,8 @@ public class YearExpenseReportFragment extends Fragment {
         expenseDataSet.setFillAlpha(180);
         expenseDataSet.setLineWidth(2f);
         expenseDataSet.setDrawValues(true);
+
+
         expenseDataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -667,9 +669,13 @@ public class YearExpenseReportFragment extends Fragment {
         RadarData radarData = new RadarData(expenseDataSet);
         radarData.setValueTextSize(10f);
 
-        monthlyRadarChart.setData(radarData);
 
-        // Cập nhật labels nếu cần
+        monthlyRadarChart.setDrawWeb(true);
+        monthlyRadarChart.getYAxis().setDrawLabels(false);
+        monthlyRadarChart.getYAxis().setDrawGridLines(false);
+        monthlyRadarChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+
+        monthlyRadarChart.setData(radarData);
         monthlyRadarChart.invalidate();
     }
 
