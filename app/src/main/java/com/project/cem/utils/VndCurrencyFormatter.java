@@ -32,7 +32,13 @@ public class VndCurrencyFormatter {
 
 
     public String formatInMillions(double amount) {
+        if (amount == 0) {
+            return "";
+        }
         double millions = amount / 1_000_000;
+
+        DecimalFormat millionFormatter = new DecimalFormat("#,##0.##");
+
         return millionFormatter.format(millions) + "M";
     }
 
